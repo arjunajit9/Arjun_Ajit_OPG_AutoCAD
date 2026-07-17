@@ -7,7 +7,7 @@ export default function HomePage() {
     <>
       <section className="hero shell">
         <div className="hero-content">
-          <div className="eyebrow">Arjun Ajit · Personal Software Projects</div>
+          
           <h1>Arjun Ajit's Software Repository </h1>
           <p className="hero-copy">
             A curated collection of applications, research tools, and digital
@@ -17,7 +17,7 @@ export default function HomePage() {
           <p className="hero-byline">Designed and developed by Arjun Ajit.</p>
         </div>
       </section>
-      <section
+     <section
         id="projects"
         className="shell applications"
         aria-labelledby="projects-title"
