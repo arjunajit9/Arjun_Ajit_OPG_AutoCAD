@@ -8,7 +8,7 @@ export default function HomePage() {
       <section className="hero shell">
         <div className="hero-content">
           <div className="eyebrow">Arjun Ajit · Personal Software Projects</div>
-          <h2>Building software that solves real problems.</h2>
+          <h1>Arjun Ajit's Software Repository </h1>
           <p className="hero-copy">
             A curated collection of applications, research tools, and digital
             experiments developed to transform practical ideas into useful
@@ -22,11 +22,7 @@ export default function HomePage() {
         className="shell applications"
         aria-labelledby="projects-title"
       >
-        <div className="section-heading">
-          <div className="eyebrow">Projects</div>
-          <h3 id="projects-title">Current Project</h3>
-         
-        </div>
+       
         <Link href="/opg-assistant" className="app-card">
           <span className="app-icon">
             <ScanLine />
