@@ -8,12 +8,11 @@ export default function HomePage() {
       <section className="hero shell">
         <div className="hero-content">
           <div className="eyebrow">Arjun Ajit · Personal Software Projects</div>
-          <h1>Building software that solves real problems.</h1>
+          <h2>Building software that solves real problems.</h2>
           <p className="hero-copy">
             A curated collection of applications, research tools, and digital
             experiments developed to transform practical ideas into useful
-            software. This website will continue to grow as new projects are
-            created.
+            software.
           </p>
           <p className="hero-byline">Designed and developed by Arjun Ajit.</p>
         </div>
@@ -25,7 +24,7 @@ export default function HomePage() {
       >
         <div className="section-heading">
           <div className="eyebrow">Projects</div>
-          <h2 id="projects-title">Current Project</h2>
+          <h3 id="projects-title">Current Project</h3>
          
         </div>
         <Link href="/opg-assistant" className="app-card">
