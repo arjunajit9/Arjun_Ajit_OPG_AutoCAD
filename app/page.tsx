@@ -26,11 +26,7 @@ export default function HomePage() {
         <div className="section-heading">
           <div className="eyebrow">Projects</div>
           <h2 id="projects-title">Current Project</h2>
-          <p>
-            The first application in this collection focuses on digital
-            measurement and research in Oral &amp; Maxillofacial Surgery. More
-            software projects will be added over time.
-          </p>
+         
         </div>
         <Link href="/opg-assistant" className="app-card">
           <span className="app-icon">
