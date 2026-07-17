@@ -4,6 +4,14 @@ import Image from "next/image";
 import { Download, Printer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { OPGFinding, TemporaryStudy } from "@/features/opg-analysis/types";
+import {
+  THESIS_DEPARTMENT,
+  THESIS_INSTITUTION,
+  THESIS_PRESENTER,
+  THESIS_PRESENTER_ROLE,
+  THESIS_TITLE,
+  WINTER_THRESHOLD_SUMMARY,
+} from "@/features/opg-analysis/thesis-copy";
 
 interface StudyPrintPreviewProps {
   study: TemporaryStudy;
@@ -19,6 +27,14 @@ function measuredFinding(findings: OPGFinding[], toothNumber: string) {
       finding.angulation?.toothNumber === toothNumber &&
       finding.angulation.measurementSource === "clinician_geometry",
   );
+}
+
+function examinerStatus(finding: OPGFinding | undefined): string {
+  if (!finding) return "Awaiting measurement";
+  if (finding.reviewStatus === "accepted") return "Confirmed";
+  if (finding.reviewStatus === "rejected") return "Repeat required";
+  if (finding.reviewStatus === "edited") return "Measured — confirm";
+  return "Awaiting confirmation";
 }
 
 export function StudyPrintPreview({
@@ -66,16 +82,19 @@ export function StudyPrintPreview({
         <article className="print-preview-sheet">
           <header className="print-report-header">
             <div>
-              <span>Specialist review document</span>
+              <span>MDS thesis presentation document</span>
               <h1 id="print-preview-title">
-                Mandibular third molar angulation report
+                Mandibular Third Molar Angulation Results
               </h1>
-              <p>Winter classification · FDI teeth 38 and 48</p>
+              <p>{THESIS_TITLE}</p>
             </div>
             <div className="print-report-meta">
+              <strong>{THESIS_PRESENTER}</strong>
+              <span>{THESIS_PRESENTER_ROLE}</span>
+              <span>{THESIS_DEPARTMENT}</span>
+              <span>{THESIS_INSTITUTION}</span>
               <strong>{study.studyReference || "Anonymous study"}</strong>
               <span>{new Date().toLocaleString()}</span>
-              <span>Image quality: {result.imageQuality}</span>
             </div>
           </header>
 
@@ -117,8 +136,8 @@ export function StudyPrintPreview({
                   </strong>
                   <small>
                     {angle?.studyEligibleClassification
-                      ? "Eligible for thesis angulation cohort"
-                      : "Not eligible or measurement incomplete"}
+                      ? "Position category recorded for study"
+                      : "Measurement incomplete"}
                   </small>
                 </article>
               );
@@ -136,7 +155,7 @@ export function StudyPrintPreview({
                   <th>Third-molar axis</th>
                   <th>Second-molar axis</th>
                   <th>Signed rotation</th>
-                  <th>Review</th>
+                  <th>Examiner status</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,7 +171,7 @@ export function StudyPrintPreview({
                       <td>{angle?.toothLongAxisDegrees ?? "—"}°</td>
                       <td>{angle?.referenceAxisDegrees ?? "—"}°</td>
                       <td>{angle?.signedRotationDegrees ?? "—"}°</td>
-                      <td>{finding?.reviewStatus || "unreviewed"}</td>
+                      <td>{examinerStatus(finding)}</td>
                     </tr>
                   );
                 })}
@@ -166,20 +185,19 @@ export function StudyPrintPreview({
               <p>
                 Winter classification is calculated from the examiner-positioned
                 long axes of the mandibular third molar and adjacent second
-                molar. Only mesioangular and distoangular classifications are
-                eligible for this thesis cohort.
+                molar. {WINTER_THRESHOLD_SUMMARY}
               </p>
             </div>
             <div>
-              <h2>Clinician comments</h2>
-              <p>{study.comments.trim() || "No clinician comments entered."}</p>
+              <h2>Presentation notes</h2>
+              <p>{study.comments.trim() || "No presentation notes entered."}</p>
             </div>
           </section>
 
           <footer className="print-report-footer">
-            <strong>Specialist review required.</strong> Angulation is a study
-            exposure and does not diagnose pericoronitis. Pericoronitis must be
-            recorded separately using the defined clinical examination criteria.
+            <strong>For MDS thesis presentation demonstration only.</strong>{" "}
+            Examiner verification is required. Angulation does not diagnose
+            pericoronitis; the clinical outcome must be recorded separately.
           </footer>
         </article>
       </section>

@@ -302,7 +302,7 @@ const steps = [
   },
   {
     title: "Confirm the suggestion",
-    text: "The software applies Winter's angular ranges and reports Mesioangular, Distoangular, Vertical, Horizontal, Other, or Unable to assess. Only confirmed mesioangular and distoangular cases enter this thesis cohort; record pericoronitis separately from clinical examination.",
+    text: "The software applies the proposal ranges: Vertical up to 10°, Mesioangular or Distoangular from 11° to 70° according to side and direction, and Horizontal from 71° onward. Record pericoronitis separately from clinical examination.",
   },
 ];
 
@@ -360,8 +360,8 @@ export function MeasurementGuide({
               <CheckCircle2 size={18} />
               <span>
                 This tool performs geometry from examiner-placed points. It does
-                not locate landmarks, classify the tooth, or diagnose
-                pericoronitis automatically.
+                not locate landmarks or diagnose pericoronitis automatically;
+                the examiner must verify the calculated classification.
               </span>
             </div>
             <div className="guide-steps">

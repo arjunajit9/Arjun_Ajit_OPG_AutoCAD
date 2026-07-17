@@ -8,7 +8,6 @@ import {
   Check,
   ChevronDown,
   Download,
-  Edit3,
   Eye,
   FileText,
   Info,
@@ -34,6 +33,15 @@ import type {
   OPGFinding,
   TemporaryStudy,
 } from "@/features/opg-analysis/types";
+import {
+  THESIS_DEPARTMENT,
+  THESIS_INSTITUTION,
+  THESIS_PRESENTER,
+  THESIS_PRESENTER_ROLE,
+  THESIS_TITLE,
+  THESIS_TOOL_NAME,
+  WINTER_THRESHOLD_SUMMARY,
+} from "@/features/opg-analysis/thesis-copy";
 
 export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
   const router = useRouter();
@@ -77,6 +85,9 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       (finding) => finding.reviewStatus !== "unreviewed",
     ).length ?? 0;
   const findings = study?.result?.findings ?? [];
+  const manualMeasurementCount = findings.filter(
+    (finding) => finding.angulation?.measurementSource === "clinician_geometry",
+  ).length;
   const hasBilateralManualMeasurements = ["38", "48"].every((toothNumber) =>
     findings.some(
       (finding) =>
@@ -119,19 +130,18 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       suggestion === "unable_to_assess" ? "unable to assess" : suggestion;
     await updateFinding(id, {
       title: `Tooth ${finding.angulation.toothNumber} — Winter result: ${readableSuggestion}`,
-      description: `Winter's classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.relativeAngleDegrees}° acute angle). ${suggestion === "mesioangular" || suggestion === "distoangular" ? "Eligible for the thesis angulation cohort" : "Outside the thesis mesioangular/distoangular cohort"}; clinician confirmation is required.`,
+      description: `Winter's classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.relativeAngleDegrees}° acute angle). This records the OPG position category for the prospective study; examiner confirmation is required.`,
       probability: undefined,
       angulation: {
         ...finding.angulation,
         ...geometry,
         classification: suggestion,
         studyEligibleClassification:
-          suggestion === "mesioangular" || suggestion === "distoangular",
+          suggestion !== "unable_to_assess" && suggestion !== "other",
         measurementSource: "clinician_geometry",
         referenceMethod:
           "Adjacent mandibular second-molar long axis (examiner-positioned)",
-        classificationMethod:
-          "Winter long-axis method: vertical ≤10°; mesioangular or distoangular >10° and <80° according to side/direction; horizontal 80–100°; other >100°. Clinician confirmation required.",
+        classificationMethod: `Proposal-aligned Winter long-axis method. ${WINTER_THRESHOLD_SUMMARY} Examiner confirmation required.`,
         modelEstimatedProbability: undefined,
         measurementUncertaintyDegrees: undefined,
         specialistReviewRequired: true,
@@ -193,7 +203,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
     const draft = buildDraftReport(study.result, study.comments);
     await updateStudy(
       { ...study, reportDraft: draft },
-      "Draft report generated",
+      "Observation summary generated",
     );
     setReportOpen(true);
   }
@@ -259,11 +269,27 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       <div className="analysis-topbar shell">
         <div>
           <div className="breadcrumb">
-            <Link href="/opg-assistant">OPG Assistant</Link>
-            <span>/</span> Analysis review
+            <Link href="/opg-assistant">{THESIS_TOOL_NAME}</Link>
+            <span>/</span> Angulation results
           </div>
-          <h1>Specialist review workspace</h1>
-          <p>
+          <h1>OPG Angulation Measurement</h1>
+          <p className="research-title">{THESIS_TITLE}</p>
+          <div
+            className="academic-author analysis-author"
+            aria-label="Research author"
+          >
+            <strong className="academic-author-name">{THESIS_PRESENTER}</strong>
+            <span className="academic-author-role">
+              {THESIS_PRESENTER_ROLE}
+            </span>
+            <span className="academic-author-affiliation">
+              {THESIS_DEPARTMENT}
+            </span>
+            <span className="academic-author-affiliation">
+              {THESIS_INSTITUTION}
+            </span>
+          </div>
+          <p className="analysis-study-meta">
             {study.studyReference
               ? `Study ${study.studyReference}`
               : "No anonymous reference"}{" "}
@@ -271,9 +297,9 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
           </p>
         </div>
         <div className="analysis-actions">
-          <span className="mode-badge">{study.result.analysisMode} mode</span>
+          <span className="mode-badge">Presentation demo</span>
           <Button variant="danger" onClick={() => void deleteStudy()}>
-            <Trash2 size={16} /> Delete study
+            <Trash2 size={16} /> Delete current OPG
           </Button>
         </div>
       </div>
@@ -282,11 +308,11 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       </div>
       <section className="bilateral-observation-header shell">
         <div>
-          <div className="eyebrow">Bilateral review</div>
-          <h2>Demonstration observations</h2>
+          <div className="eyebrow">MDS thesis presentation</div>
+          <h2>Bilateral Angulation Results</h2>
           <p>
-            Tooth 38 is displayed on the left and tooth 48 on the right of the
-            radiograph.
+            Examiner-guided Winter measurements: tooth 38 is shown on the left
+            and tooth 48 on the right of the radiograph.
           </p>
         </div>
         <div
@@ -305,9 +331,9 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       <div className="mock-warning bilateral-warning shell">
         <Info size={18} />
         <span>
-          <strong>Thesis scope: teeth 38 and 48 only.</strong> Mock
-          classifications are not image-derived; pericoronitis is not determined
-          from an OPG.
+          <strong>Measurement scope: teeth 38 and 48.</strong> No position is
+          pre-classified. Results appear after examiner marking; pericoronitis
+          is not determined from an OPG.
         </span>
       </div>
       <div className="analysis-grid bilateral-grid">
@@ -335,6 +361,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
                   }}
                   onSelect={() => setSelectedId(finding.id)}
                   onUpdate={(patch) => void updateFinding(finding.id, patch)}
+                  onReset={() => void resetGeometry(finding.id)}
                 />
               ))}
           </div>
@@ -353,25 +380,24 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
           />
           <div className="model-strip">
             <div>
-              <span>Analysis status</span>
+              <span>Measurement status</span>
               <strong>
-                <i className="status-dot" /> Demonstration complete
+                <i className="status-dot" /> {manualMeasurementCount}/2 teeth
+                measured
               </strong>
             </div>
             <div>
-              <span>Model / version</span>
-              <strong>
-                {study.result.modelName} · {study.result.modelVersion}
-              </strong>
+              <span>Measurement method</span>
+              <strong>Winter long-axis geometry</strong>
             </div>
             <div>
-              <span>Image quality</span>
+              <span>OPG suitability</span>
               <strong className="quality-limited">
-                {study.result.imageQuality}
+                Examiner check required
               </strong>
             </div>
             <div>
-              <span>Human review</span>
+              <span>Examiner verification</span>
               <strong>Required</strong>
             </div>
           </div>
@@ -400,6 +426,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
                   }}
                   onSelect={() => setSelectedId(finding.id)}
                   onUpdate={(patch) => void updateFinding(finding.id, patch)}
+                  onReset={() => void resetGeometry(finding.id)}
                 />
               ))}
           </div>
@@ -408,11 +435,11 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       <section className="report-section shell">
         <div className="report-controls">
           <div>
-            <div className="eyebrow">Clinician input</div>
-            <h2>Overall comments and draft report</h2>
+            <div className="eyebrow">Presentation record</div>
+            <h2>Presentation notes and observation summary</h2>
             <p>
-              Rejected observations are excluded. The report remains editable
-              and cannot be electronically signed.
+              Add brief notes for the thesis demonstration and generate an
+              editable observation summary.
             </p>
           </div>
           <div className="report-actions">
@@ -438,12 +465,12 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
               {pdfExporting ? "Preparing PDF…" : "Download PDF"}
             </Button>
             <Button onClick={() => void generateReport()}>
-              <FileText size={17} /> Generate draft report
+              <FileText size={17} /> Generate observation summary
             </Button>
           </div>
         </div>
         <label className="field-label" htmlFor="comments">
-          Overall clinician comments
+          Presentation notes
         </label>
         <textarea
           id="comments"
@@ -453,14 +480,14 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
             setStudy({ ...study, comments: event.target.value })
           }
           onBlur={() => void temporaryStudyStore.put(study)}
-          placeholder="Add clinical context, corrections, or limitations. Do not enter patient identifiers."
+          placeholder="Add presentation notes, measurement comments, or limitations. Do not enter patient identifiers."
         />
         {reportOpen && (
           <div className="report-editor">
             <div className="report-editor-heading">
               <div>
-                <h3>Editable draft</h3>
-                <span>Specialist approval required</span>
+                <h3>Editable observation summary</h3>
+                <span>Examiner verification required</span>
               </div>
               <div>
                 <Button
@@ -480,7 +507,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
               </div>
             </div>
             <textarea
-              aria-label="Draft report"
+              aria-label="Observation summary"
               value={study.reportDraft || ""}
               onChange={(event) =>
                 setStudy({ ...study, reportDraft: event.target.value })
@@ -515,17 +542,19 @@ const FindingCard = forwardRef<
     selected: boolean;
     onSelect: () => void;
     onUpdate: (patch: Partial<OPGFinding>) => void;
+    onReset: () => void;
   }
->(function FindingCard({ finding, selected, onSelect, onUpdate }, ref) {
-  const [editing, setEditing] = useState(false);
-  const [description, setDescription] = useState(finding.description);
-  const probability =
-    finding.probability ?? finding.angulation?.modelEstimatedProbability;
+>(function FindingCard(
+  { finding, selected, onSelect, onUpdate, onReset },
+  ref,
+) {
+  const isMeasured =
+    finding.angulation?.measurementSource === "clinician_geometry";
   const statusLabel: Record<FindingReviewStatus, string> = {
-    unreviewed: "Unreviewed",
-    accepted: "Accepted",
-    rejected: "Rejected",
-    edited: "Edited",
+    unreviewed: "Awaiting measurement",
+    accepted: "Confirmed",
+    rejected: "Repeat required",
+    edited: "Measured — confirm",
   };
   return (
     <div
@@ -549,87 +578,39 @@ const FindingCard = forwardRef<
             ` · Tooth ${finding.toothNumbers.join(", ")}`}
         </p>
       )}
-      {editing ? (
-        <textarea
-          className="finding-edit"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-        />
-      ) : (
-        <p>{finding.description}</p>
-      )}
-      {typeof probability === "number" && (
-        <div className="probability">
-          <span>Model-estimated probability</span>
-          <strong>{Math.round(probability * 100)}%</strong>
-          <div>
-            <i style={{ width: `${probability * 100}%` }} />
-          </div>
-          <small>Not diagnostic certainty</small>
-        </div>
-      )}
+      <p>{finding.description}</p>
       {finding.angulation && (
         <AngulationPanel finding={finding} onUpdate={onUpdate} />
       )}
-      <div className="finding-actions">
-        {editing ? (
+      {isMeasured && (
+        <div className="finding-actions">
           <Button
-            variant="secondary"
+            variant="ghost"
+            className={
+              finding.reviewStatus === "accepted" ? "active-accept" : ""
+            }
             onClick={(event) => {
               event.stopPropagation();
-              setEditing(false);
               onUpdate({
-                description,
-                originalDescription:
-                  finding.originalDescription || finding.description,
-                reviewStatus: "edited",
+                reviewStatus: "accepted",
                 annotationSource: "clinician",
               });
             }}
           >
-            <Save size={15} /> Save edit
+            <Check size={15} /> Confirm result
           </Button>
-        ) : (
-          <>
-            <Button
-              variant="ghost"
-              className={
-                finding.reviewStatus === "accepted" ? "active-accept" : ""
-              }
-              onClick={(event) => {
-                event.stopPropagation();
-                onUpdate({
-                  reviewStatus: "accepted",
-                  annotationSource: "clinician",
-                });
-              }}
-            >
-              <Check size={15} /> Accept
-            </Button>
-            <Button
-              variant="ghost"
-              className={
-                finding.reviewStatus === "rejected" ? "active-reject" : ""
-              }
-              onClick={(event) => {
-                event.stopPropagation();
-                onUpdate({ reviewStatus: "rejected" });
-              }}
-            >
-              <X size={15} /> Reject
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditing(true);
-              }}
-            >
-              <Edit3 size={15} /> Edit
-            </Button>
-          </>
-        )}
-      </div>
+          <Button
+            variant="ghost"
+            onClick={(event) => {
+              event.stopPropagation();
+              onSelect();
+              onReset();
+            }}
+          >
+            <X size={15} /> Repeat measurement
+          </Button>
+        </div>
+      )}
     </div>
   );
 });
@@ -643,24 +624,23 @@ function AngulationPanel({
 }) {
   const angle = finding.angulation!;
   const isManual = angle.measurementSource === "clinician_geometry";
-  const isUnmeasured = angle.measurementSource === "unmeasured";
   return (
     <details className="measurement-panel" open>
       <summary>
-        {"Winter's classification and calculation"} <ChevronDown size={15} />
+        {"Winter position and calculation"} <ChevronDown size={15} />
       </summary>
       <div className="angle-result">
         <div>
           <span>
             {isManual
               ? "Winter's classification — confirm"
-              : isUnmeasured
-                ? "Awaiting new measurement"
-                : "Mock Winter demonstration"}
+              : "Awaiting examiner marking"}
           </span>
           <select
             className="classification-select"
             value={angle.classification}
+            disabled={!isManual}
+            aria-label={`Winter classification for tooth ${angle.toothNumber}`}
             onClick={(event) => event.stopPropagation()}
             onChange={(event) =>
               onUpdate({
@@ -668,9 +648,12 @@ function AngulationPanel({
                   ...angle,
                   classification: event.target
                     .value as typeof angle.classification,
-                  studyEligibleClassification:
-                    event.target.value === "mesioangular" ||
-                    event.target.value === "distoangular",
+                  studyEligibleClassification: [
+                    "mesioangular",
+                    "distoangular",
+                    "vertical",
+                    "horizontal",
+                  ].includes(event.target.value),
                 },
                 reviewStatus: "edited",
                 annotationSource: "clinician",
@@ -679,11 +662,9 @@ function AngulationPanel({
           >
             <option value="mesioangular">Mesioangular</option>
             <option value="distoangular">Distoangular</option>
-            <option value="vertical">Vertical — outside thesis scope</option>
-            <option value="horizontal">
-              Horizontal — outside thesis scope
-            </option>
-            <option value="other">Other — outside thesis scope</option>
+            <option value="vertical">Vertical</option>
+            <option value="horizontal">Horizontal</option>
+            <option value="other">Other — manual correction</option>
             <option value="unable_to_assess">Unable to assess</option>
           </select>
         </div>
@@ -700,13 +681,7 @@ function AngulationPanel({
       <dl className="measurement-grid">
         <div>
           <dt>Measurement source</dt>
-          <dd>
-            {isManual
-              ? "Clinician geometry"
-              : isUnmeasured
-                ? "Not measured"
-                : "Mock demonstration"}
-          </dd>
+          <dd>{isManual ? "Examiner-positioned geometry" : "Not measured"}</dd>
         </div>
         <div>
           <dt>Mandibular third molar</dt>
@@ -721,11 +696,11 @@ function AngulationPanel({
           <dd>{angle.referenceAxisDegrees ?? "—"}°</dd>
         </div>
         <div>
-          <dt>Thesis cohort eligibility</dt>
+          <dt>Study position category</dt>
           <dd>
-            {angle.studyEligibleClassification
-              ? "Eligible — mesioangular/distoangular"
-              : "Not eligible — outside selected angulations"}
+            {isManual && angle.studyEligibleClassification
+              ? `Recorded — ${angle.classification.replaceAll("_", " ")}`
+              : "Awaiting a measurable Winter classification"}
           </dd>
         </div>
         <div>
@@ -763,9 +738,7 @@ function AngulationPanel({
         <AlertTriangle size={15} />{" "}
         {isManual
           ? "Calculated from the four points placed by the examiner. Confirm the landmark protocol and classification manually."
-          : isUnmeasured
-            ? "The previous points were removed. Place all four points again to calculate a new result."
-            : "Mock measurement—not calculated from this image. Use Measure axes to create a real geometric measurement."}{" "}
+          : "Place all four examiner points to calculate a new result."}{" "}
         Angulation is a study exposure, not a pericoronitis diagnosis.
       </p>
     </details>

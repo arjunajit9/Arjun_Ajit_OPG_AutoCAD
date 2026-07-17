@@ -1,21 +1,39 @@
 import type { OPGAnalysisResult } from "./types";
+import {
+  THESIS_PRESENTER,
+  THESIS_PRESENTER_ROLE,
+  THESIS_TITLE,
+  WINTER_THRESHOLD_SUMMARY,
+} from "./thesis-copy";
 
-export function buildDraftReport(result: OPGAnalysisResult, comments: string): string {
-  const reviewed = result.findings.filter((finding) => finding.reviewStatus === "accepted" || finding.reviewStatus === "edited");
+export function buildDraftReport(
+  result: OPGAnalysisResult,
+  comments: string,
+): string {
+  const reviewed = result.findings.filter(
+    (finding) =>
+      finding.reviewStatus === "accepted" || finding.reviewStatus === "edited",
+  );
   const lines = reviewed.length
     ? reviewed.map((finding) => `• ${finding.title}: ${finding.description}`)
-    : ["• No observations have been accepted for inclusion. This does not indicate a normal examination."];
+    : [
+        "• No examiner-measured observations have been confirmed for this summary.",
+      ];
   return [
-    "DRAFT — SPECIALIST REVIEW REQUIRED",
+    "THESIS PRESENTATION OBSERVATION SUMMARY",
+    `Thesis topic: ${THESIS_TITLE}`,
+    `Presenter: ${THESIS_PRESENTER}, ${THESIS_PRESENTER_ROLE}`,
     `Anonymous study reference: ${result.studyReference || "Not provided"}`,
     `Generated: ${new Date(result.generatedAt).toLocaleString()}`,
-    `Image quality: ${result.imageQuality}`,
     "",
-    "Reviewed observations",
+    "Measured observations",
     ...lines,
     "",
-    "Clinician comments",
-    comments.trim() || "No comments entered.",
+    "Presentation notes",
+    comments.trim() || "No presentation notes entered.",
+    "",
+    "Proposal-aligned Winter thresholds",
+    WINTER_THRESHOLD_SUMMARY,
     "",
     "Limitations",
     ...result.limitations.map((limitation) => `• ${limitation}`),
@@ -23,6 +41,6 @@ export function buildDraftReport(result: OPGAnalysisResult, comments: string): s
     "Study outcome note",
     "Pericoronitis status must be recorded from the study's defined clinical examination criteria; it is not determined from this OPG review.",
     "",
-    "Research prototype — not for autonomous diagnosis or treatment decisions. This draft requires review and approval by a qualified dental or maxillofacial professional.",
+    "For MDS thesis presentation demonstration only. Examiner verification is required; this tool does not make a diagnosis or treatment decision.",
   ].join("\n");
 }

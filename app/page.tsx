@@ -1,22 +1,56 @@
 import Link from "next/link";
-import { ArrowRight, ScanLine, ShieldCheck } from "lucide-react";
+import { ArrowRight, ScanLine } from "lucide-react";
+import { THESIS_TOOL_NAME } from "@/features/opg-analysis/thesis-copy";
 
 export default function HomePage() {
   return (
     <>
       <section className="hero shell">
-        <div className="eyebrow">Personal workspace · Digital experiments</div>
-        <h1>Thoughtful software for meaningful work.</h1>
-        <p className="hero-copy">I’m Arjun Ajit. This is my home for carefully designed applications, technical projects, and ideas built to solve real problems.</p>
-        <div className="hero-meta"><span><ShieldCheck size={18} /> Privacy-conscious</span><span>Research-led design</span></div>
+        <div className="hero-content">
+          <div className="eyebrow">Arjun Ajit · Personal Software Projects</div>
+          <h1>Building software that solves real problems.</h1>
+          <p className="hero-copy">
+            A curated collection of applications, research tools, and digital
+            experiments developed to transform practical ideas into useful
+            software. This website will continue to grow as new projects are
+            created.
+          </p>
+          <p className="hero-byline">Designed and developed by Arjun Ajit.</p>
+        </div>
       </section>
-      <section className="shell applications" aria-labelledby="apps-title">
-        <div className="section-heading"><div><div className="eyebrow">Applications</div><h2 id="apps-title">Explore the workspace</h2></div><p>Purpose-built tools with clear boundaries and transparent behavior.</p></div>
+      <section
+        id="projects"
+        className="shell applications"
+        aria-labelledby="projects-title"
+      >
+        <div className="section-heading">
+          <div className="eyebrow">Projects</div>
+          <h2 id="projects-title">Current Project</h2>
+          <p>
+            The first application in this collection focuses on digital
+            measurement and research in Oral &amp; Maxillofacial Surgery. More
+            software projects will be added over time.
+          </p>
+        </div>
         <Link href="/opg-assistant" className="app-card">
-          <span className="app-icon"><ScanLine /></span>
-          <span className="status-pill"><i /> Prototype</span>
-          <span><span className="app-kicker">Cross-sectional thesis interface</span><strong>Mandibular Third Molar Study Assistant</strong><span className="app-description">Compare mesioangular and distoangular impactions of teeth 38 and 48 as risk indicators for clinically assessed pericoronitis.</span></span>
-          <span className="card-action">Open application <ArrowRight size={18} /></span>
+          <span className="app-icon">
+            <ScanLine />
+          </span>
+          <span className="project-card-content">
+            <span className="project-card-meta">
+              <span className="app-kicker">Dental Research Tool</span>
+              <span className="status-pill">Prototype</span>
+            </span>
+            <strong>{THESIS_TOOL_NAME}</strong>
+            <span className="app-description">
+              A research-focused digital OPG assessment tool for examiner-guided
+              measurement of mandibular third molar angulation and documentation
+              for postgraduate research.
+            </span>
+          </span>
+          <span className="card-action">
+            Open Project <ArrowRight size={17} />
+          </span>
         </Link>
       </section>
     </>

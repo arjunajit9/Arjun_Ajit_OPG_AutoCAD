@@ -52,8 +52,10 @@ describe("manual axis geometry", () => {
     expect(winterAngulationClassification("48", 25)).toBe("mesioangular");
     expect(winterAngulationClassification("48", -25)).toBe("distoangular");
     expect(winterAngulationClassification("48", 10)).toBe("vertical");
-    expect(winterAngulationClassification("48", 80)).toBe("horizontal");
-    expect(winterAngulationClassification("48", 110)).toBe("other");
+    expect(winterAngulationClassification("48", 10.1)).toBe("mesioangular");
+    expect(winterAngulationClassification("48", 70.9)).toBe("mesioangular");
+    expect(winterAngulationClassification("48", 71)).toBe("horizontal");
+    expect(winterAngulationClassification("48", 110)).toBe("horizontal");
     expect(winterAngulationClassification("18", 25)).toBe("unable_to_assess");
   });
 });

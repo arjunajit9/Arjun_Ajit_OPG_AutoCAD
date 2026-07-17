@@ -1,8 +1,8 @@
-# Arjun Ajit — OPG Research Prototype
+# Lakshmi Thesis OPG Tool
 
-A personal landing page and browser-local thesis interface for comparing mesioangular and distoangular mandibular third-molar impactions (FDI 38 and 48) as risk indicators for clinically assessed pericoronitis.
+A browser-local presentation tool supporting the OPG angulation-measurement component of the prospective MDS thesis, "Assessment of Mandibular Third Molar Position as a Risk Indicator for Pericoronitis." The examiner marks the long axes for FDI teeth 38 and 48 and the tool calculates the Winter position category.
 
-> Research prototype — not for autonomous diagnosis or treatment decisions. Mock angulation classifications are not derived from the uploaded image. Pericoronitis is a clinical outcome and is not diagnosed from an OPG alone.
+> MDS thesis presentation demonstration only — not for diagnosis or treatment decisions. No position is pre-classified: results are calculated from examiner-positioned geometry. Pericoronitis is assessed separately through the study's clinical protocol.
 
 ## Local development
 

@@ -7,6 +7,14 @@ import {
 } from "pdf-lib";
 import { extendLine, lineIntersection } from "./geometry";
 import type { OPGFinding, TemporaryStudy } from "./types";
+import {
+  THESIS_DEPARTMENT,
+  THESIS_INSTITUTION,
+  THESIS_PRESENTER,
+  THESIS_PRESENTER_ROLE,
+  THESIS_TITLE,
+  WINTER_THRESHOLD_SUMMARY,
+} from "./thesis-copy";
 
 const PAGE_WIDTH = 841.89;
 const PAGE_HEIGHT = 595.28;
@@ -70,6 +78,14 @@ function measuredFinding(findings: OPGFinding[], toothNumber: string) {
       finding.angulation?.toothNumber === toothNumber &&
       finding.angulation.measurementSource === "clinician_geometry",
   );
+}
+
+function examinerStatus(finding: OPGFinding | undefined): string {
+  if (!finding) return "Awaiting measurement";
+  if (finding.reviewStatus === "accepted") return "Confirmed";
+  if (finding.reviewStatus === "rejected") return "Repeat required";
+  if (finding.reviewStatus === "edited") return "Measured - confirm";
+  return "Awaiting confirmation";
 }
 
 export async function createAnnotatedRadiographPng(
@@ -231,8 +247,8 @@ function drawResultCard(
   );
   page.drawText(
     angle?.studyEligibleClassification
-      ? "Thesis cohort: eligible"
-      : "Thesis cohort: not eligible / incomplete",
+      ? "Position category recorded for study"
+      : "Measurement incomplete",
     {
       x: x + 14,
       y: y + 17,
@@ -261,21 +277,28 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     height: 68,
     color: rgb(0.03, 0.22, 0.2),
   });
-  page.drawText("MANDIBULAR THIRD MOLAR ANGULATION REPORT", {
+  page.drawText("MANDIBULAR THIRD MOLAR ANGULATION RESULTS", {
     x: 31,
     y: PAGE_HEIGHT - 33,
     size: 18,
     font: bold,
     color: rgb(1, 1, 1),
   });
-  page.drawText("Winter classification | Specialist review required", {
+  page.drawText(ascii(THESIS_TITLE), {
     x: 31,
     y: PAGE_HEIGHT - 51,
-    size: 9,
+    size: 7.5,
     font: regular,
     color: rgb(0.72, 0.86, 0.83),
   });
-  const metadata = `Study: ${ascii(study.studyReference || "Anonymous")} | Generated: ${new Date().toLocaleString()} | Image quality: ${study.result.imageQuality}`;
+  page.drawText(ascii(`${THESIS_PRESENTER} | ${THESIS_PRESENTER_ROLE}`), {
+    x: 590,
+    y: PAGE_HEIGHT - 33,
+    size: 7.5,
+    font: regular,
+    color: rgb(0.86, 0.94, 0.92),
+  });
+  const metadata = `Study: ${ascii(study.studyReference || "Anonymous")} | Generated: ${new Date().toLocaleString()} | OPG suitability: examiner check required`;
   page.drawText(metadata, {
     x: 31,
     y: PAGE_HEIGHT - 88,
@@ -335,7 +358,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     bold,
   );
   page.drawText(
-    "Research prototype - not for autonomous diagnosis or treatment decisions.",
+    "For MDS thesis presentation demonstration only - examiner verification required.",
     {
       x: 31,
       y: 18,
@@ -354,13 +377,16 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     font: bold,
     color: rgb(0.03, 0.22, 0.2),
   });
-  detail.drawText("Examiner-positioned geometry and Winter classification", {
-    x: 31,
-    y: PAGE_HEIGHT - 59,
-    size: 9,
-    font: regular,
-    color: rgb(0.31, 0.4, 0.38),
-  });
+  detail.drawText(
+    ascii(`${THESIS_PRESENTER} | ${THESIS_DEPARTMENT} | ${THESIS_INSTITUTION}`),
+    {
+      x: 31,
+      y: PAGE_HEIGHT - 59,
+      size: 8,
+      font: regular,
+      color: rgb(0.31, 0.4, 0.38),
+    },
+  );
   ["38", "48"].forEach((toothNumber, index) => {
     const finding = measuredFinding(study.result!.findings, toothNumber);
     const angle = finding?.angulation;
@@ -392,10 +418,10 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
           ["Second-molar axis", `${angle.referenceAxisDegrees ?? "-"} deg`],
           ["Signed rotation", `${angle.signedRotationDegrees ?? "-"} deg`],
           [
-            "Thesis eligibility",
-            angle.studyEligibleClassification ? "Eligible" : "Not eligible",
+            "Study position category",
+            angle.studyEligibleClassification ? "Recorded" : "Incomplete",
           ],
-          ["Review status", finding.reviewStatus],
+          ["Examiner status", examinerStatus(finding)],
         ]
       : [["Status", "Manual measurement not completed"]];
     rows.forEach(([label, value], rowIndex) => {
@@ -425,7 +451,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   });
   drawWrappedText(
     detail,
-    "Winter classification is calculated from the angle between the examiner-positioned long axes of the mandibular third molar and adjacent second molar. Only mesioangular and distoangular classifications are eligible for this thesis cohort. Pericoronitis must be recorded separately using the defined clinical examination criteria.",
+    `Winter classification is calculated from the angle between the examiner-positioned long axes of the mandibular third molar and adjacent second molar. ${WINTER_THRESHOLD_SUMMARY} Pericoronitis must be recorded separately using the defined clinical examination criteria.`,
     {
       x: 31,
       y: 266,
@@ -436,7 +462,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       color: rgb(0.2, 0.28, 0.27),
     },
   );
-  detail.drawText("CLINICIAN COMMENTS", {
+  detail.drawText("PRESENTATION NOTES", {
     x: 31,
     y: 195,
     size: 11,
@@ -445,7 +471,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   });
   drawWrappedText(
     detail,
-    study.comments.trim() || "No clinician comments entered.",
+    study.comments.trim() || "No presentation notes entered.",
     {
       x: 31,
       y: 177,
@@ -474,7 +500,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   });
   drawWrappedText(
     detail,
-    "The axes and classifications require confirmation by a qualified dental or maxillofacial professional. Angulation is a study exposure and does not diagnose pericoronitis.",
+    "The axes and classifications require examiner confirmation. This is a thesis-presentation measurement aid; angulation does not diagnose pericoronitis or determine treatment.",
     {
       x: 45,
       y: 78,

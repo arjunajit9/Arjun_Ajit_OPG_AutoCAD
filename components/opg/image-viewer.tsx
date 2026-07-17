@@ -261,7 +261,7 @@ export function ImageViewer({
           <Image
             ref={imageRef}
             src={imageUrl}
-            alt="Uploaded panoramic radiograph for specialist review"
+            alt="Uploaded panoramic radiograph for examiner-guided measurement"
             width={1600}
             height={800}
             unoptimized

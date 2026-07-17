@@ -103,11 +103,12 @@ export function winterAngulationClassification(
   const normalizedRotation = normalizeSignedAngle(signedRotationDegrees);
   const magnitude = Math.abs(normalizedRotation);
 
-  // Treat the published integer ranges as continuous boundaries so decimal
-  // measurements do not fall into gaps between categories.
+  // The approved proposal uses vertical up to 10 degrees, angular positions
+  // from 11 through 70 degrees, and horizontal from 71 degrees onward. Treat
+  // those integer ranges as continuous boundaries so decimal measurements do
+  // not fall into gaps between categories.
   if (magnitude <= 10) return "vertical";
-  if (magnitude >= 80 && magnitude <= 100) return "horizontal";
-  if (magnitude > 100) return "other";
+  if (magnitude >= 71) return "horizontal";
 
   const mesialRotation =
     toothNumber === "38" ? normalizedRotation < 0 : normalizedRotation > 0;
