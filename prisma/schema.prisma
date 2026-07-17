@@ -1,0 +1,94 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum StudyStatus { ACTIVE REVIEWED DELETION_SCHEDULED DELETED }
+enum ReviewDecision { ACCEPTED REJECTED EDITED }
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  displayName String?
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  reviews FindingReview[]
+  auditEvents AuditEvent[]
+}
+
+model Study {
+  id String @id @default(uuid())
+  anonymousReference String?
+  status StudyStatus @default(ACTIVE)
+  retentionUntil DateTime
+  createdAt DateTime @default(now())
+  analyses Analysis[]
+  imageAssets ImageAsset[]
+  reports ReportDraft[]
+}
+
+model ImageAsset {
+  id String @id @default(uuid())
+  studyId String
+  encryptedStorageKey String
+  mediaType String
+  checksum String
+  deletedAt DateTime?
+  study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+}
+
+model Analysis {
+  id String @id @default(uuid())
+  studyId String
+  provider String
+  modelName String
+  modelVersion String
+  analysisMode String
+  imageQuality String
+  generatedAt DateTime
+  study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  findings Finding[]
+}
+
+model Finding {
+  id String @id @default(uuid())
+  analysisId String
+  category String
+  title String
+  originalDescription String
+  probability Float?
+  geometry Json?
+  measurement Json?
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  reviews FindingReview[]
+}
+
+model FindingReview {
+  id String @id @default(uuid())
+  findingId String
+  reviewerId String
+  decision ReviewDecision
+  editedDescription String?
+  createdAt DateTime @default(now())
+  finding Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  reviewer User @relation(fields: [reviewerId], references: [id])
+}
+
+model ReportDraft {
+  id String @id @default(uuid())
+  studyId String
+  content String
+  version Int @default(1)
+  approvedAt DateTime?
+  createdAt DateTime @default(now())
+  study Study @relation(fields: [studyId], references: [id], onDelete: Cascade)
+}
+
+model AuditEvent {
+  id String @id @default(uuid())
+  actorId String?
+  action String
+  resourceType String
+  resourceId String
+  safeMetadata Json?
+  createdAt DateTime @default(now())
+  actor User? @relation(fields: [actorId], references: [id])
+}

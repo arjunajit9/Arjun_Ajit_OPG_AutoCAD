@@ -1,0 +1,46 @@
+{
+  "name": "arjun-website-opg",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@prisma/client": "latest",
+    "lucide-react": "latest",
+    "next": "16.2.10",
+    "pdf-lib": "^1.17.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest",
+    "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.2.10",
+    "eslint-config-prettier": "latest",
+    "jsdom": "latest",
+    "postcss": "latest",
+    "prettier": "latest",
+    "prisma": "latest",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "latest"
+  }
+}

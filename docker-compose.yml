@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      NEXT_PUBLIC_ANALYSIS_PROVIDER: mock
+      NEXT_PUBLIC_MAX_UPLOAD_MB: 20
+      NEXT_PUBLIC_TEMP_STUDY_HOURS: 24
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["future-services"]
+    environment:
+      POSTGRES_USER: opg_user
+      POSTGRES_PASSWORD: local_development_only
+      POSTGRES_DB: opg_assistant
+    volumes: ["opg_data:/var/lib/postgresql/data"]
+volumes:
+  opg_data:
