@@ -28,6 +28,16 @@ describe("MockOPGAnalysisProvider", () => {
     expect(
       result.findings.map((finding) => finding.angulation?.toothNumber).sort(),
     ).toEqual(["38", "48"]);
+    const imageLeft = result.findings.find(
+      (finding) => (finding.boundingBox?.x ?? 1) < 0.5,
+    );
+    const imageRight = result.findings.find(
+      (finding) => (finding.boundingBox?.x ?? 0) > 0.5,
+    );
+    expect(imageLeft?.angulation?.toothNumber).toBe("48");
+    expect(imageLeft?.region).toContain("Patient right");
+    expect(imageRight?.angulation?.toothNumber).toBe("38");
+    expect(imageRight?.region).toContain("Patient left");
     expect(
       result.findings.every(
         (finding) =>

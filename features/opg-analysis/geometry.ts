@@ -1,4 +1,8 @@
 import type { AngulationClassification, MeasurementPoint } from "./types";
+import {
+  screenRotationToSignedWinterAngle,
+  type MandibularThirdMolarToothNumber,
+} from "./laterality";
 
 export interface GeometryResult {
   toothAxis: [MeasurementPoint, MeasurementPoint];
@@ -26,6 +30,13 @@ function normalizeSignedAngle(value: number): number {
   return normalized;
 }
 
+function normalizeSignedAxisAngle(value: number): number {
+  let normalized = normalizeSignedAngle(value);
+  if (normalized > 90) normalized -= 180;
+  if (normalized < -90) normalized += 180;
+  return normalized;
+}
+
 function round(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -33,6 +44,8 @@ function round(value: number): number {
 export function calculateGeometry(
   points: MeasurementPoint[],
   aspectRatio = 1,
+  toothNumber?: MandibularThirdMolarToothNumber,
+  horizontallyFlipped = false,
 ): GeometryResult | undefined {
   if (points.length !== 4) return undefined;
   const toothAxis: [MeasurementPoint, MeasurementPoint] = [
@@ -45,13 +58,17 @@ export function calculateGeometry(
   ];
   const toothLongAxisDegrees = lineAngle(toothAxis, aspectRatio);
   const referenceAxisDegrees = lineAngle(referenceAxis, aspectRatio);
-  const signedRotationDegrees = normalizeSignedAngle(
+  const screenRotationDegrees = normalizeSignedAxisAngle(
     toothLongAxisDegrees - referenceAxisDegrees,
   );
-  const relativeAngleDegrees = Math.min(
-    Math.abs(signedRotationDegrees),
-    180 - Math.abs(signedRotationDegrees),
-  );
+  const signedRotationDegrees = toothNumber
+    ? screenRotationToSignedWinterAngle(
+        toothNumber,
+        screenRotationDegrees,
+        horizontallyFlipped,
+      )
+    : screenRotationDegrees;
+  const relativeAngleDegrees = Math.abs(signedRotationDegrees);
   return {
     toothAxis,
     referenceAxis,
@@ -110,7 +127,5 @@ export function winterAngulationClassification(
   if (magnitude <= 10) return "vertical";
   if (magnitude >= 71) return "horizontal";
 
-  const mesialRotation =
-    toothNumber === "38" ? normalizedRotation < 0 : normalizedRotation > 0;
-  return mesialRotation ? "mesioangular" : "distoangular";
+  return normalizedRotation > 0 ? "mesioangular" : "distoangular";
 }

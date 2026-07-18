@@ -50,10 +50,16 @@ function GuideDiagram({ step }: { step: number }) {
           strokeDasharray="5 4"
         />
         <text x="39" y="113" fill="#fff" fontSize="10" textAnchor="middle">
-          38
+          48
         </text>
         <text x="201" y="113" fill="#fff" fontSize="10" textAnchor="middle">
-          48
+          38
+        </text>
+        <text x="14" y="17" fill="#9ee6d7" fontSize="11" fontWeight="700">
+          R
+        </text>
+        <text x="220" y="17" fill="#9ee6d7" fontSize="11" fontWeight="700">
+          L
         </text>
       </svg>
     );
@@ -226,10 +232,10 @@ function GuideDiagram({ step }: { step: number }) {
           θ
         </text>
         <text x="20" y="24" fill="#60726f" fontSize="10">
-          acute relative angle
+          signed anatomical Winter angle
         </text>
         <text x="20" y="42" fill="#132825" fontSize="12" fontWeight="700">
-          θ = min(|A−B|, 180−|A−B|)
+          + mesioangular · − distoangular
         </text>
       </svg>
     );
@@ -282,15 +288,15 @@ function GuideDiagram({ step }: { step: number }) {
 const steps = [
   {
     title: "Prepare the study image",
-    text: "Use a de-identified OPG with the mandibular third-molar regions visible. The thesis scope is FDI 38 and 48 only.",
+    text: "Use a de-identified OPG with the mandibular third-molar regions visible. In standard panoramic orientation, image left / R is patient right (FDI 48), and image right / L is patient left (FDI 38).",
   },
   {
     title: "Select and enlarge the tooth",
-    text: "Choose the 38 or 48 finding card. Zoom and pan until the third molar and its adjacent second molar are clearly visible.",
+    text: "Choose the anatomically labelled 48 or 38 finding card. Zoom and pan until the third molar and its adjacent second molar are clearly visible.",
   },
   {
     title: "Draw the tooth long axis",
-    text: "Click Measure axes. Place point 1 at the third-molar root/apical end and point 2 at its crown/occlusal end. This direction is required for the side-aware suggestion.",
+    text: "Click Measure axes. Place point 1 at the third-molar root/apical end and point 2 at its crown/occlusal end. This consistent direction is required for the signed anatomical angle.",
   },
   {
     title: "Draw the adjacent second-molar axis",
@@ -298,11 +304,11 @@ const steps = [
   },
   {
     title: "Review the on-image angle",
-    text: "Both axes extend to their intersection. The arc remains on the image, while the fixed top-right result shows the angle and the panel reports Winter's classification.",
+    text: "Both axes extend to their intersection. The arc remains on the image, while the result badge on the corresponding image side shows the signed Winter angle and classification.",
   },
   {
     title: "Confirm the suggestion",
-    text: "The software applies the proposal ranges: Vertical up to 10°, Mesioangular or Distoangular from 11° to 70° according to side and direction, and Horizontal from 71° onward. Record pericoronitis separately from clinical examination.",
+    text: "The software applies the signed convention: Vertical from −10° to +10°, Mesioangular from +11° to +70°, Distoangular from −11° to −70°, and Horizontal from ±71° onward. Record pericoronitis separately from clinical examination.",
   },
 ];
 
@@ -386,8 +392,8 @@ export function MeasurementGuide({
                   measuring.
                 </li>
                 <li>
-                  Confirm that the OPG has not been horizontally mirrored; a
-                  mirrored display can reverse the side-aware suggestion.
+                  Use visible R/L markers when available: R identifies patient
+                  right / tooth 48 and L identifies patient left / tooth 38.
                 </li>
                 <li>
                   Use the same endpoint orientation for every line so the signed

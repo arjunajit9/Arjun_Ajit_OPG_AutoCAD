@@ -45,7 +45,7 @@ export function StudyPrintPreview({
   onDownload,
 }: StudyPrintPreviewProps) {
   const result = study.result!;
-  const bilateral = ["38", "48"].map((toothNumber) => ({
+  const bilateral = ["48", "38"].map((toothNumber) => ({
     toothNumber,
     finding: measuredFinding(result.findings, toothNumber),
   }));
@@ -126,12 +126,14 @@ export function StudyPrintPreview({
               return (
                 <article className="print-result-card" key={toothNumber}>
                   <span>
-                    {toothNumber === "38" ? "Left side" : "Right side"}
+                    {toothNumber === "48"
+                      ? "Image left · Patient right"
+                      : "Image right · Patient left"}
                   </span>
                   <h2>Tooth {toothNumber}</h2>
                   <strong>
                     {angle
-                      ? `${angle.classification.replaceAll("_", " ")} · ${angle.relativeAngleDegrees}°`
+                      ? `${angle.classification.replaceAll("_", " ")} · ${angle.signedRotationDegrees}°`
                       : "Not measured"}
                   </strong>
                   <small>
@@ -151,10 +153,9 @@ export function StudyPrintPreview({
                 <tr>
                   <th>Tooth</th>
                   <th>Winter result</th>
-                  <th>Acute angle</th>
+                  <th>Signed Winter angle</th>
                   <th>Third-molar axis</th>
                   <th>Second-molar axis</th>
-                  <th>Signed rotation</th>
                   <th>Examiner status</th>
                 </tr>
               </thead>
@@ -167,10 +168,9 @@ export function StudyPrintPreview({
                       <td>
                         {angle?.classification.replaceAll("_", " ") || "—"}
                       </td>
-                      <td>{angle?.relativeAngleDegrees ?? "—"}°</td>
+                      <td>{angle?.signedRotationDegrees ?? "—"}°</td>
                       <td>{angle?.toothLongAxisDegrees ?? "—"}°</td>
                       <td>{angle?.referenceAxisDegrees ?? "—"}°</td>
-                      <td>{angle?.signedRotationDegrees ?? "—"}°</td>
                       <td>{examinerStatus(finding)}</td>
                     </tr>
                   );

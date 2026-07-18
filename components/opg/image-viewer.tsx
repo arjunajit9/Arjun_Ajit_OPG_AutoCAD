@@ -25,6 +25,11 @@ import {
   lineIntersection,
   type GeometryResult,
 } from "@/features/opg-analysis/geometry";
+import {
+  displaySideForTooth,
+  isMandibularThirdMolarToothNumber,
+  signedWinterAngleToScreenRotation,
+} from "@/features/opg-analysis/laterality";
 
 interface ImageViewerProps {
   imageUrl: string;
@@ -33,6 +38,8 @@ interface ImageViewerProps {
   onSelect: (id: string) => void;
   onGeometryChange: (findingId: string, geometry: GeometryResult) => void;
   onGeometryReset: (findingId: string) => void;
+  showBilateralMeasurements: boolean;
+  onBilateralVisibilityChange: (visible: boolean) => void;
 }
 
 export function ImageViewer({
@@ -42,13 +49,13 @@ export function ImageViewer({
   onSelect,
   onGeometryChange,
   onGeometryReset,
+  showBilateralMeasurements,
+  onBilateralVisibilityChange,
 }: ImageViewerProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [annotations, setAnnotations] = useState(true);
-  const [showBilateralMeasurements, setShowBilateralMeasurements] =
-    useState(false);
   const [drag, setDrag] = useState<{ x: number; y: number }>();
   const [measurementPoints, setMeasurementPoints] = useState<
     MeasurementPoint[] | null
@@ -74,7 +81,12 @@ export function ImageViewer({
     };
     const next = [...measurementPoints, point];
     setMeasurementPoints(next);
-    const geometry = calculateGeometry(next, rect.width / rect.height);
+    const toothNumber = selectedFinding?.angulation?.toothNumber;
+    const geometry = calculateGeometry(
+      next,
+      rect.width / rect.height,
+      isMandibularThirdMolarToothNumber(toothNumber) ? toothNumber : undefined,
+    );
     if (geometry) {
       onGeometryChange(selectedId, geometry);
       setMeasurementPoints(null);
@@ -165,7 +177,10 @@ export function ImageViewer({
           <Button
             variant={measurementPoints ? "danger" : "secondary"}
             disabled={!selectedFinding?.angulation}
-            onClick={() => setMeasurementPoints((value) => (value ? null : []))}
+            onClick={() => {
+              if (!measurementPoints) onBilateralVisibilityChange(false);
+              setMeasurementPoints((value) => (value ? null : []));
+            }}
             aria-label={
               measurementPoints
                 ? "Cancel axis measurement"
@@ -180,7 +195,7 @@ export function ImageViewer({
             disabled={!selectedFinding?.angulation}
             onClick={() => {
               if (!selectedId) return;
-              setShowBilateralMeasurements(false);
+              onBilateralVisibilityChange(false);
               setMeasurementPoints([]);
               onGeometryReset(selectedId);
             }}
@@ -192,7 +207,9 @@ export function ImageViewer({
           <Button
             variant={showBilateralMeasurements ? "primary" : "secondary"}
             disabled={!hasBilateralMeasurements || Boolean(measurementPoints)}
-            onClick={() => setShowBilateralMeasurements((current) => !current)}
+            onClick={() =>
+              onBilateralVisibilityChange(!showBilateralMeasurements)
+            }
             aria-pressed={showBilateralMeasurements}
             aria-label={
               showBilateralMeasurements
@@ -275,7 +292,7 @@ export function ImageViewer({
                   <button
                     key={finding.id}
                     type="button"
-                    className={`annotation ${selectedId === finding.id ? "selected" : ""} ${finding.annotationSource === "clinician" ? "confirmed" : "model"}`}
+                    className={`annotation ${selectedId === finding.id || (showBilateralMeasurements && measuredFindings.some((measuredFinding) => measuredFinding.id === finding.id)) ? "selected" : ""} ${finding.annotationSource === "clinician" ? "confirmed" : "model"}`}
                     style={{
                       left: `${finding.boundingBox.x * 100}%`,
                       top: `${finding.boundingBox.y * 100}%`,
@@ -367,14 +384,14 @@ export function ImageViewer({
             .map(({ finding }) => (
               <div
                 key={`readout-${finding.id}`}
-                className={`angle-readout angle-readout-${finding.angulation?.toothNumber === "38" ? "left" : "right"}`}
+                className={`angle-readout angle-readout-${isMandibularThirdMolarToothNumber(finding.angulation?.toothNumber) ? displaySideForTooth(finding.angulation.toothNumber) : "right"}`}
                 role="status"
-                aria-label={`Tooth ${finding.angulation?.toothNumber} measured angle ${finding.angulation?.relativeAngleDegrees} degrees; ${finding.angulation?.classification}`}
+                aria-label={`Tooth ${finding.angulation?.toothNumber} signed Winter angle ${finding.angulation?.signedRotationDegrees} degrees; ${finding.angulation?.classification}`}
               >
                 <span>
                   Tooth {finding.angulation?.toothNumber} · Winter result
                 </span>
-                <strong>{finding.angulation?.relativeAngleDegrees}°</strong>
+                <strong>{finding.angulation?.signedRotationDegrees}°</strong>
                 <small>
                   {finding.angulation?.classification.replaceAll("_", " ")} ·
                   confirm clinically
@@ -392,6 +409,7 @@ export function ImageViewer({
         <span>
           <Maximize2 size={14} /> Scroll to zoom · drag to pan
         </span>
+        <span>Image left / R = Tooth 48 · Image right / L = Tooth 38</span>
       </div>
     </div>
   );
@@ -403,6 +421,15 @@ function createFindingOverlay(finding: OPGFinding) {
   const referenceAxis = angle.referenceAxis!;
   const intersection = lineIntersection(toothAxis, referenceAxis);
   let displayRotation = angle.signedRotationDegrees;
+  if (
+    displayRotation !== undefined &&
+    isMandibularThirdMolarToothNumber(angle.toothNumber)
+  ) {
+    displayRotation = signedWinterAngleToScreenRotation(
+      angle.toothNumber,
+      displayRotation,
+    );
+  }
   if (displayRotation !== undefined && displayRotation > 90)
     displayRotation -= 180;
   if (displayRotation !== undefined && displayRotation < -90)

@@ -1,6 +1,8 @@
 import { analysisResultSchema } from "../schemas";
 import type { OPGAnalysisProvider } from "../provider";
 import type { OPGAnalysisInput, OPGAnalysisResult } from "../types";
+import { toothNumberForDisplaySide } from "../laterality";
+import { CURRENT_MEASUREMENT_MODEL_VERSION } from "../result-normalization";
 
 export class MockOPGAnalysisProvider implements OPGAnalysisProvider {
   async analyse(input: OPGAnalysisInput): Promise<OPGAnalysisResult> {
@@ -11,7 +13,7 @@ export class MockOPGAnalysisProvider implements OPGAnalysisProvider {
       studyReference: input.studyReference,
       provider: "mock",
       modelName: "Examiner-Guided Winter Measurement",
-      modelVersion: "proposal-thresholds-1.0.0",
+      modelVersion: CURRENT_MEASUREMENT_MODEL_VERSION,
       analysisMode: "research",
       status: "completed",
       imageQuality: "limited",
@@ -25,19 +27,20 @@ export class MockOPGAnalysisProvider implements OPGAnalysisProvider {
       ],
       findings: [
         {
-          id: "finding-angulation-38",
+          id: "finding-angulation-48",
           category: "mandibular_third_molar_angulation",
-          title: "Tooth 38 — not measured",
+          title: "Tooth 48 — not measured",
           description:
             "Place the third-molar and adjacent second-molar long axes to calculate the angulation.",
-          toothNumbers: ["38"],
-          region: "Lower-left posterior mandible",
+          toothNumbers: [toothNumberForDisplaySide("left")],
+          region:
+            "Patient right posterior mandible (image left, near R marker)",
           severity: "not_assessed",
           reviewStatus: "unreviewed",
           annotationSource: "clinician",
           boundingBox: { x: 0.17, y: 0.49, width: 0.14, height: 0.26 },
           angulation: {
-            toothNumber: "38",
+            toothNumber: toothNumberForDisplaySide("left"),
             classification: "unable_to_assess",
             referenceMethod:
               "Adjacent mandibular second-molar long axis (awaiting examiner points)",
@@ -50,19 +53,20 @@ export class MockOPGAnalysisProvider implements OPGAnalysisProvider {
           },
         },
         {
-          id: "finding-angulation-48",
+          id: "finding-angulation-38",
           category: "mandibular_third_molar_angulation",
-          title: "Tooth 48 — not measured",
+          title: "Tooth 38 — not measured",
           description:
             "Place the third-molar and adjacent second-molar long axes to calculate the angulation.",
-          toothNumbers: ["48"],
-          region: "Lower-right posterior mandible",
+          toothNumbers: [toothNumberForDisplaySide("right")],
+          region:
+            "Patient left posterior mandible (image right, near L marker)",
           severity: "not_assessed",
           reviewStatus: "unreviewed",
           annotationSource: "clinician",
           boundingBox: { x: 0.69, y: 0.49, width: 0.14, height: 0.26 },
           angulation: {
-            toothNumber: "48",
+            toothNumber: toothNumberForDisplaySide("right"),
             classification: "unable_to_assess",
             referenceMethod:
               "Adjacent mandibular second-molar long axis (awaiting examiner points)",

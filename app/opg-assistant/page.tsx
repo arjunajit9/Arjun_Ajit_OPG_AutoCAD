@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { UploadWorkflow } from "@/components/opg/upload-workflow";
-import { SafetyNotice } from "@/components/opg/safety-notice";
-import { MeasurementGuide } from "@/components/opg/measurement-guide";
+import { TechnicalMethodCard } from "@/components/opg/technical-method-card";
 import {
   THESIS_DEPARTMENT,
   THESIS_INSTITUTION,
@@ -37,14 +36,7 @@ export default function OPGAssistantPage() {
         </div>
         <span className="mode-badge">Presentation demo</span>
       </div>
-      <SafetyNotice />
-      <div className="guide-launch">
-        <div>
-          <strong>New to geometric measurement?</strong>
-          <span>See every step before uploading a study image.</span>
-        </div>
-        <MeasurementGuide />
-      </div>
+      <TechnicalMethodCard />
       <UploadWorkflow />
     </div>
   );

@@ -10,16 +10,15 @@ import {
   Download,
   Eye,
   FileText,
-  Info,
   Printer,
   Save,
   Trash2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SafetyNotice } from "./safety-notice";
 import { ImageViewer } from "./image-viewer";
 import { StudyPrintPreview } from "./print-preview";
+import { TechnicalMethodCard } from "./technical-method-card";
 import type { GeometryResult } from "@/features/opg-analysis/geometry";
 import { winterAngulationClassification } from "@/features/opg-analysis/geometry";
 import { buildDraftReport } from "@/features/opg-analysis/report-builder";
@@ -28,6 +27,7 @@ import {
   downloadStudyPdf,
 } from "@/features/opg-analysis/pdf-export";
 import { temporaryStudyStore } from "@/features/opg-analysis/storage/temporary-study-store";
+import { normalizeStoredStudyLaterality } from "@/features/opg-analysis/result-normalization";
 import type {
   FindingReviewStatus,
   OPGFinding,
@@ -55,14 +55,22 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
   const [printPreviewImageUrl, setPrintPreviewImageUrl] = useState<string>();
   const [previewLoading, setPreviewLoading] = useState(false);
   const [pdfExporting, setPdfExporting] = useState(false);
+  const [showBilateralMeasurements, setShowBilateralMeasurements] =
+    useState(false);
 
   useEffect(() => {
     void temporaryStudyStore
       .get(analysisId)
-      .then((value) => {
-        setStudy(value);
-        setSelectedId(value?.result?.findings[0]?.id);
-        if (value) setImageUrl(URL.createObjectURL(value.image));
+      .then(async (value) => {
+        const normalized = value
+          ? normalizeStoredStudyLaterality(value)
+          : undefined;
+        if (normalized && normalized !== value) {
+          await temporaryStudyStore.put(normalized);
+        }
+        setStudy(normalized);
+        setSelectedId(normalized?.result?.findings[0]?.id);
+        if (normalized) setImageUrl(URL.createObjectURL(normalized.image));
       })
       .catch(() => setMessage("Temporary browser storage could not be read."))
       .finally(() => setLoading(false));
@@ -85,6 +93,13 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       (finding) => finding.reviewStatus !== "unreviewed",
     ).length ?? 0;
   const findings = study?.result?.findings ?? [];
+  const selectedToothNumber = findings.find(
+    (finding) => finding.id === selectedId,
+  )?.angulation?.toothNumber;
+  const tooth48Active =
+    showBilateralMeasurements || selectedToothNumber === "48";
+  const tooth38Active =
+    showBilateralMeasurements || selectedToothNumber === "38";
   const manualMeasurementCount = findings.filter(
     (finding) => finding.angulation?.measurementSource === "clinician_geometry",
   ).length;
@@ -130,7 +145,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       suggestion === "unable_to_assess" ? "unable to assess" : suggestion;
     await updateFinding(id, {
       title: `Tooth ${finding.angulation.toothNumber} — Winter result: ${readableSuggestion}`,
-      description: `Winter's classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.relativeAngleDegrees}° acute angle). This records the OPG position category for the prospective study; examiner confirmation is required.`,
+      description: `Winter's classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.signedRotationDegrees}° signed Winter angle). This records the OPG position category for the prospective study; examiner confirmation is required.`,
       probability: undefined,
       angulation: {
         ...finding.angulation,
@@ -153,6 +168,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
   async function resetGeometry(id: string) {
     const finding = study?.result?.findings.find((item) => item.id === id);
     if (!finding?.angulation) return;
+    setShowBilateralMeasurements(false);
     const toothNumber = finding.angulation.toothNumber;
     await updateFinding(id, {
       title: `Tooth ${toothNumber} — ready for a new measurement`,
@@ -182,11 +198,20 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
     });
   }
   function selectFinding(id: string) {
+    setShowBilateralMeasurements(false);
     setSelectedId(id);
     findingRefs.current[id]?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
+  }
+  function selectToothPanel(toothNumber: "38" | "48") {
+    const finding = findings.find(
+      (item) => item.angulation?.toothNumber === toothNumber,
+    );
+    if (!finding) return;
+    setShowBilateralMeasurements(false);
+    setSelectedId(finding.id);
   }
   async function deleteStudy() {
     if (
@@ -304,16 +329,12 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
         </div>
       </div>
       <div className="shell">
-        <SafetyNotice compact />
+        <TechnicalMethodCard />
       </div>
       <section className="bilateral-observation-header shell">
         <div>
           <div className="eyebrow">MDS thesis presentation</div>
           <h2>Bilateral Angulation Results</h2>
-          <p>
-            Examiner-guided Winter measurements: tooth 38 is shown on the left
-            and tooth 48 on the right of the radiograph.
-          </p>
         </div>
         <div
           className="progress-ring"
@@ -328,29 +349,45 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
           </span>
         </div>
       </section>
-      <div className="mock-warning bilateral-warning shell">
-        <Info size={18} />
-        <span>
-          <strong>Measurement scope: teeth 38 and 48.</strong> No position is
-          pre-classified. Results appear after examiner marking; pericoronitis
-          is not determined from an OPG.
-        </span>
-      </div>
       <div className="analysis-grid bilateral-grid">
         <section
-          className="findings-column side-findings"
-          aria-labelledby="finding-38-title"
+          className={`findings-column side-findings ${tooth48Active ? "selected-side-panel" : ""}`}
+          aria-labelledby="finding-48-title"
+          tabIndex={0}
+          onClick={() => selectToothPanel("48")}
+          onKeyDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              (event.key === "Enter" || event.key === " ")
+            ) {
+              event.preventDefault();
+              selectToothPanel("48");
+            }
+          }}
         >
           <div className="findings-header">
             <div>
-              <span className="side-label">Left side</span>
-              <h2 id="finding-38-title">Tooth 38</h2>
-              <p>Mandibular left third molar</p>
+              <h2 id="finding-48-title">Tooth 48</h2>
+              <p>Mandibular right third molar · near R marker</p>
             </div>
+            {tooth48Active && (
+              <span className="active-tooth-badge">
+                {showBilateralMeasurements ? "Both active" : "Active tooth"}
+              </span>
+            )}
+          </div>
+          <div
+            className={`panel-selection-strip ${tooth48Active ? "active" : ""}`}
+          >
+            {showBilateralMeasurements
+              ? "Both measurements are displayed"
+              : tooth48Active
+                ? "Selected for measurement"
+                : "Select Tooth 48 to measure"}
           </div>
           <div className="findings-list">
             {findings
-              .filter((finding) => finding.angulation?.toothNumber === "38")
+              .filter((finding) => finding.angulation?.toothNumber === "48")
               .map((finding) => (
                 <FindingCard
                   key={finding.id}
@@ -377,6 +414,8 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
               void updateGeometry(id, geometry)
             }
             onGeometryReset={(id) => void resetGeometry(id)}
+            showBilateralMeasurements={showBilateralMeasurements}
+            onBilateralVisibilityChange={setShowBilateralMeasurements}
           />
           <div className="model-strip">
             <div>
@@ -403,19 +442,43 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
           </div>
         </section>
         <section
-          className="findings-column side-findings"
-          aria-labelledby="finding-48-title"
+          className={`findings-column side-findings ${tooth38Active ? "selected-side-panel" : ""}`}
+          aria-labelledby="finding-38-title"
+          tabIndex={0}
+          onClick={() => selectToothPanel("38")}
+          onKeyDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              (event.key === "Enter" || event.key === " ")
+            ) {
+              event.preventDefault();
+              selectToothPanel("38");
+            }
+          }}
         >
           <div className="findings-header">
             <div>
-              <span className="side-label">Right side</span>
-              <h2 id="finding-48-title">Tooth 48</h2>
-              <p>Mandibular right third molar</p>
+              <h2 id="finding-38-title">Tooth 38</h2>
+              <p>Mandibular left third molar · near L marker</p>
             </div>
+            {tooth38Active && (
+              <span className="active-tooth-badge">
+                {showBilateralMeasurements ? "Both active" : "Active tooth"}
+              </span>
+            )}
+          </div>
+          <div
+            className={`panel-selection-strip ${tooth38Active ? "active" : ""}`}
+          >
+            {showBilateralMeasurements
+              ? "Both measurements are displayed"
+              : tooth38Active
+                ? "Selected for measurement"
+                : "Select Tooth 38 to measure"}
           </div>
           <div className="findings-list">
             {findings
-              .filter((finding) => finding.angulation?.toothNumber === "48")
+              .filter((finding) => finding.angulation?.toothNumber === "38")
               .map((finding) => (
                 <FindingCard
                   key={finding.id}
@@ -669,9 +732,9 @@ function AngulationPanel({
           </select>
         </div>
         <div>
-          <span>Acute relative angle</span>
+          <span>Signed Winter angle</span>
           <strong>
-            {angle.relativeAngleDegrees ?? "—"}°{" "}
+            {angle.signedRotationDegrees ?? "—"}°{" "}
             {angle.measurementUncertaintyDegrees !== undefined && (
               <small>±{angle.measurementUncertaintyDegrees}°</small>
             )}
@@ -704,7 +767,7 @@ function AngulationPanel({
           </dd>
         </div>
         <div>
-          <dt>Signed rotation</dt>
+          <dt>Signed Winter angle</dt>
           <dd>
             {angle.signedRotationDegrees !== undefined
               ? `${angle.signedRotationDegrees}°`
@@ -714,8 +777,8 @@ function AngulationPanel({
         <div>
           <dt>Calculation</dt>
           <dd>
-            acute(|third-molar axis − second-molar axis|) ={" "}
-            {angle.relativeAngleDegrees ?? "—"}°
+            anatomical signed(third-molar axis − second-molar axis) ={" "}
+            {angle.signedRotationDegrees ?? "—"}°
           </dd>
         </div>
         <div className="full">

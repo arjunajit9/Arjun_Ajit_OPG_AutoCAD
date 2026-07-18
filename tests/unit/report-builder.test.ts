@@ -42,7 +42,7 @@ describe("draft report", () => {
     expect(report).toContain("Accepted title");
     expect(report).not.toContain("Rejected title");
     expect(report).toContain("THESIS PRESENTATION OBSERVATION SUMMARY");
-    expect(report).toContain("Dr Lakshmi Raju");
+    expect(report).toContain("Dr. Lakshmi Raju");
     expect(report).toContain("Pericoronitis status must be recorded");
   });
 });

@@ -167,7 +167,8 @@ export async function createAnnotatedRadiographPng(
 
     const badgeWidth = Math.max(190, width * 0.2);
     const badgeHeight = Math.max(64, width * 0.065);
-    const badgeX = angle.toothNumber === "38" ? 18 : width - badgeWidth - 18;
+    const isImageLeft = angle.toothNumber === "48";
+    const badgeX = isImageLeft ? 18 : width - badgeWidth - 18;
     const badgeY = 18;
     context.save();
     context.fillStyle = "rgba(8,34,31,.94)";
@@ -179,11 +180,10 @@ export async function createAnnotatedRadiographPng(
     context.stroke();
     context.fillStyle = "#ffffff";
     context.font = `700 ${Math.max(18, width * 0.02)}px Arial`;
-    context.textAlign = angle.toothNumber === "38" ? "left" : "right";
-    const textX =
-      angle.toothNumber === "38" ? badgeX + 14 : badgeX + badgeWidth - 14;
+    context.textAlign = isImageLeft ? "left" : "right";
+    const textX = isImageLeft ? badgeX + 14 : badgeX + badgeWidth - 14;
     context.fillText(
-      `Tooth ${angle.toothNumber}: ${angle.relativeAngleDegrees}°`,
+      `Tooth ${angle.toothNumber}: ${angle.signedRotationDegrees}°`,
       textX,
       badgeY + badgeHeight * 0.48,
     );
@@ -235,7 +235,7 @@ function drawResultCard(
   const angle = finding?.angulation;
   page.drawText(
     angle
-      ? `${ascii(angle.classification.replaceAll("_", " ")).toUpperCase()} | ${angle.relativeAngleDegrees ?? "-"} deg`
+      ? `${ascii(angle.classification.replaceAll("_", " ")).toUpperCase()} | ${angle.signedRotationDegrees ?? "-"} deg`
       : "NOT MEASURED",
     {
       x: x + 14,
@@ -339,8 +339,8 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   );
   drawResultCard(
     page,
-    measuredFinding(study.result.findings, "38"),
-    "38 - LEFT",
+    measuredFinding(study.result.findings, "48"),
+    "48 - PATIENT RIGHT",
     31,
     43,
     376,
@@ -349,8 +349,8 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   );
   drawResultCard(
     page,
-    measuredFinding(study.result.findings, "48"),
-    "48 - RIGHT",
+    measuredFinding(study.result.findings, "38"),
+    "38 - PATIENT LEFT",
     435,
     43,
     376,
@@ -387,7 +387,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       color: rgb(0.31, 0.4, 0.38),
     },
   );
-  ["38", "48"].forEach((toothNumber, index) => {
+  ["48", "38"].forEach((toothNumber, index) => {
     const finding = measuredFinding(study.result!.findings, toothNumber);
     const angle = finding?.angulation;
     const x = index === 0 ? 31 : 435;
@@ -401,7 +401,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       borderWidth: 1,
     });
     detail.drawText(
-      `TOOTH ${toothNumber} - ${toothNumber === "38" ? "LEFT" : "RIGHT"}`,
+      `TOOTH ${toothNumber} - PATIENT ${toothNumber === "38" ? "LEFT" : "RIGHT"}`,
       {
         x: x + 15,
         y: 483,
@@ -413,10 +413,9 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     const rows = angle
       ? [
           ["Winter result", angle.classification.replaceAll("_", " ")],
-          ["Acute relative angle", `${angle.relativeAngleDegrees ?? "-"} deg`],
+          ["Signed Winter angle", `${angle.signedRotationDegrees ?? "-"} deg`],
           ["Third-molar axis", `${angle.toothLongAxisDegrees ?? "-"} deg`],
           ["Second-molar axis", `${angle.referenceAxisDegrees ?? "-"} deg`],
-          ["Signed rotation", `${angle.signedRotationDegrees ?? "-"} deg`],
           [
             "Study position category",
             angle.studyEligibleClassification ? "Recorded" : "Incomplete",

@@ -6,15 +6,50 @@ import {
 } from "@/features/opg-analysis/geometry";
 
 describe("manual axis geometry", () => {
-  it("calculates an acute angle and preserves signed rotation", () => {
-    const result = calculateGeometry([
-      { x: 0, y: 0 },
-      { x: 1, y: 0.577350269 },
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-    ]);
+  it("calculates an acute angle and converts screen rotation to a signed anatomical Winter angle", () => {
+    const result = calculateGeometry(
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0.577350269 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ],
+      1,
+      "48",
+    );
     expect(result?.relativeAngleDegrees).toBe(30);
+    expect(result?.signedRotationDegrees).toBe(30);
+  });
+
+  it("preserves a negative signed Winter angle for a distoangular result", () => {
+    const result = calculateGeometry(
+      [
+        { x: 0, y: 0 },
+        { x: 1, y: 0.577350269 },
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+      ],
+      1,
+      "38",
+    );
     expect(result?.signedRotationDegrees).toBe(-30);
+    expect(winterAngulationClassification("38", -30)).toBe("distoangular");
+  });
+
+  it("preserves the anatomical angle when the viewer is horizontally flipped", () => {
+    const result = calculateGeometry(
+      [
+        { x: 1, y: 0 },
+        { x: 0, y: 0.577350269 },
+        { x: 1, y: 0 },
+        { x: 0, y: 0 },
+      ],
+      1,
+      "48",
+      true,
+    );
+    expect(result?.signedRotationDegrees).toBe(30);
+    expect(winterAngulationClassification("48", 30)).toBe("mesioangular");
   });
 
   it("uses the acute intersection angle", () => {
@@ -46,11 +81,13 @@ describe("manual axis geometry", () => {
     ).toEqual({ x: 0.5, y: 0.5 });
   });
 
-  it("applies Winter ranges and maps direction according to mandibular side", () => {
-    expect(winterAngulationClassification("38", -25)).toBe("mesioangular");
-    expect(winterAngulationClassification("38", 25)).toBe("distoangular");
+  it("applies Winter ranges using the signed anatomical convention", () => {
+    expect(winterAngulationClassification("38", 25)).toBe("mesioangular");
+    expect(winterAngulationClassification("38", -25)).toBe("distoangular");
     expect(winterAngulationClassification("48", 25)).toBe("mesioangular");
     expect(winterAngulationClassification("48", -25)).toBe("distoangular");
+    expect(winterAngulationClassification("38", 0.4)).toBe("vertical");
+    expect(winterAngulationClassification("48", -0.4)).toBe("vertical");
     expect(winterAngulationClassification("48", 10)).toBe("vertical");
     expect(winterAngulationClassification("48", 10.1)).toBe("mesioangular");
     expect(winterAngulationClassification("48", 70.9)).toBe("mesioangular");
