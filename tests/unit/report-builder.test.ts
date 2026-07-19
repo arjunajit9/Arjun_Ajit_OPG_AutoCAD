@@ -13,7 +13,6 @@ const result: OPGAnalysisResult = {
   imageQuality: "limited",
   generatedAt: "2026-01-01T00:00:00.000Z",
   requiresSpecialistReview: true,
-  limitations: ["Mock only"],
   findings: [
     {
       id: "accepted",
@@ -37,12 +36,17 @@ const result: OPGAnalysisResult = {
 };
 
 describe("draft report", () => {
-  it("includes accepted and excludes rejected observations", () => {
-    const report = buildDraftReport(result, "Reviewed by clinician.");
-    expect(report).toContain("Accepted title");
-    expect(report).not.toContain("Rejected title");
-    expect(report).toContain("THESIS PRESENTATION OBSERVATION SUMMARY");
-    expect(report).toContain("Dr. Lakshmi Raju");
-    expect(report).toContain("Pericoronitis status must be recorded");
+  it("generates the final clinical report without presentation notes or limitations", () => {
+    const report = buildDraftReport(
+      result,
+      "Reviewed by clinician.",
+      "Final assessment recorded.",
+    );
+    expect(report).toContain("FINAL CLINICAL REPORT");
+    expect(report).toContain("Clinician Comments");
+    expect(report).toContain("Final Clinical Assessment");
+    expect(report).toContain("Final assessment recorded.");
+    expect(report).not.toContain("Presentation notes");
+    expect(report).not.toContain("Limitations");
   });
 });

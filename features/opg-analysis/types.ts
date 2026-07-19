@@ -77,7 +77,6 @@ export interface OPGAnalysisResult {
   status: "completed" | "unable_to_analyse";
   imageQuality: "adequate" | "limited" | "unusable";
   findings: OPGFinding[];
-  limitations: string[];
   generatedAt: string;
   requiresSpecialistReview: true;
 }
@@ -91,6 +90,7 @@ export interface TemporaryStudy {
   createdAt: string;
   expiresAt: string;
   result?: OPGAnalysisResult;
-  comments: string;
+  clinicianComments: string;
+  finalClinicalAssessment: string;
   reportDraft?: string;
 }

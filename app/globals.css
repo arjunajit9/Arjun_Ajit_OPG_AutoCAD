@@ -785,6 +785,8 @@ h3 {
   flex-wrap: wrap;
   gap: 18px;
   padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f7faf9;
   color: var(--muted);
   font-size: 10px;
 }
@@ -2325,6 +2327,64 @@ h3 {
   display: block;
   margin-bottom: 4px;
 }
+.print-study-information,
+.print-opg-analysis {
+  margin-top: 20px;
+}
+.print-study-information h2,
+.print-opg-analysis h2 {
+  margin: 0 0 9px;
+  font-size: 15px;
+}
+.print-study-information dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.print-study-information dl > div {
+  padding: 10px 12px;
+  border: 1px solid #d9e5e2;
+  border-radius: 8px;
+  background: #f7faf9;
+}
+.print-study-information dt,
+.print-analysis-card dt {
+  color: #5b6f6b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.print-study-information dd,
+.print-analysis-card dd {
+  margin: 3px 0 0;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+.print-analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.print-analysis-card {
+  padding: 13px 15px;
+  border: 1px solid #cbded9;
+  border-radius: 10px;
+  background: #f4faf8;
+}
+.print-analysis-card h3 {
+  margin: 0 0 8px;
+  color: var(--teal);
+  font-size: 17px;
+}
+.print-analysis-card dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+  margin: 0;
+}
 .print-image-section {
   margin-top: 20px;
   padding: 10px;
@@ -2374,9 +2434,9 @@ h3 {
 }
 .print-result-card > span {
   color: var(--teal);
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .print-result-card h2 {
@@ -2386,10 +2446,11 @@ h3 {
 .print-result-card strong,
 .print-result-card small {
   display: block;
-  text-transform: capitalize;
 }
 .print-result-card strong {
+  margin-top: 7px;
   font-size: 18px;
+  text-transform: uppercase;
 }
 .print-result-card small {
   margin-top: 3px;
@@ -2404,6 +2465,11 @@ h3 {
 .print-method-section h2 {
   font-size: 15px;
   margin: 0 0 9px;
+}
+.print-detail-author {
+  margin: -3px 0 10px;
+  color: var(--muted);
+  font-size: 9px;
 }
 .print-detail-section table {
   width: 100%;
@@ -2425,6 +2491,9 @@ h3 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+}
+.print-method-section.print-method-single {
+  grid-template-columns: 1fr;
 }
 .print-method-section > div {
   padding: 13px;
@@ -2466,6 +2535,11 @@ h3 {
   .print-report-header,
   .print-method-section {
     display: block;
+  }
+  .print-study-information dl,
+  .print-analysis-grid,
+  .print-analysis-card dl {
+    grid-template-columns: 1fr;
   }
   .print-report-meta {
     margin-top: 14px;
@@ -2513,7 +2587,9 @@ h3 {
     max-height: 128mm;
   }
   .print-bilateral-results,
-  .print-method-section {
+  .print-method-section,
+  .print-study-information,
+  .print-opg-analysis {
     break-inside: avoid;
   }
   .print-report-footer {

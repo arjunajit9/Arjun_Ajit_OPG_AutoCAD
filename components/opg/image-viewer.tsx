@@ -232,6 +232,18 @@ export function ImageViewer({
           <MeasurementGuide label="Guide" />
         </div>
       </div>
+      <div className="viewer-legend">
+        <span>
+          <i className="legend-tooth" /> Third-molar long axis
+        </span>
+        <span>
+          <i className="legend-reference" /> Adjacent second-molar long axis
+        </span>
+        <span>
+          <Maximize2 size={14} /> Scroll to zoom · drag to pan
+        </span>
+        <span>Image left / R = Tooth 48 · Image right / L = Tooth 38</span>
+      </div>
       {measurementPoints && (
         <div className="measurement-instruction" role="status">
           <strong>Point {measurementPoints.length + 1} of 4:</strong>{" "}
@@ -389,7 +401,8 @@ export function ImageViewer({
                 aria-label={`Tooth ${finding.angulation?.toothNumber} signed Winter angle ${finding.angulation?.signedRotationDegrees} degrees; ${finding.angulation?.classification}`}
               >
                 <span>
-                  Tooth {finding.angulation?.toothNumber} · Winter result
+                  Tooth {finding.angulation?.toothNumber} · Winter&apos;s
+                  Classification
                 </span>
                 <strong>{finding.angulation?.signedRotationDegrees}°</strong>
                 <small>
@@ -398,18 +411,6 @@ export function ImageViewer({
                 </small>
               </div>
             ))}
-      </div>
-      <div className="viewer-legend">
-        <span>
-          <i className="legend-tooth" /> Third-molar long axis
-        </span>
-        <span>
-          <i className="legend-reference" /> Adjacent second-molar long axis
-        </span>
-        <span>
-          <Maximize2 size={14} /> Scroll to zoom · drag to pan
-        </span>
-        <span>Image left / R = Tooth 48 · Image right / L = Tooth 38</span>
       </div>
     </div>
   );

@@ -5,20 +5,30 @@ import {
 } from "./laterality";
 import type { TemporaryStudy } from "./types";
 
-export const CURRENT_MEASUREMENT_MODEL_VERSION =
-  "patient-laterality-signed-angle-2.0.0";
+export const CURRENT_MEASUREMENT_MODEL_VERSION = "clinical-report-3.0.0";
 
 export function normalizeStoredStudyLaterality(
   study: TemporaryStudy,
 ): TemporaryStudy {
+  const legacyStudy = study as TemporaryStudy & { comments?: string };
+  const { comments: legacyComments, ...studyWithoutLegacyComments } =
+    legacyStudy;
+  const normalizedStudy: TemporaryStudy = {
+    ...studyWithoutLegacyComments,
+    clinicianComments: study.clinicianComments ?? legacyComments ?? "",
+    finalClinicalAssessment: study.finalClinicalAssessment ?? "",
+    reportDraft: study.reportDraft?.includes("PRESENTATION")
+      ? undefined
+      : study.reportDraft,
+  };
   if (
-    !study.result ||
-    study.result.modelVersion === CURRENT_MEASUREMENT_MODEL_VERSION
+    !normalizedStudy.result ||
+    normalizedStudy.result.modelVersion === CURRENT_MEASUREMENT_MODEL_VERSION
   ) {
-    return study;
+    return normalizedStudy;
   }
 
-  const findings = study.result.findings.map((finding) => {
+  const findings = normalizedStudy.result.findings.map((finding) => {
     if (!finding.angulation || !finding.boundingBox) return finding;
     const imageCenterX = finding.boundingBox.x + finding.boundingBox.width / 2;
     const toothNumber = toothNumberForNormalizedImageX(imageCenterX);
@@ -56,9 +66,9 @@ export function normalizeStoredStudyLaterality(
   });
 
   return {
-    ...study,
+    ...normalizedStudy,
     result: {
-      ...study.result,
+      ...normalizedStudy.result,
       modelVersion: CURRENT_MEASUREMENT_MODEL_VERSION,
       findings,
     },

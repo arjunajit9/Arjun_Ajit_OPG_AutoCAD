@@ -49,9 +49,11 @@ test("upload, measure both sides, confirm, and export presentation results", asy
   await stage.click({ position: { x: 340, y: 330 } });
   await stage.click({ position: { x: 340, y: 150 } });
   await expect(
-    page.getByText("Winter's classification — confirm"),
+    page.getByText("Winter's Classification — confirm"),
   ).toBeVisible();
-  await expect(page.locator(".angle-readout")).toContainText("Winter result");
+  await expect(page.locator(".angle-readout")).toContainText(
+    "Winter's Classification",
+  );
   await page
     .getByRole("button", { name: "Reset marking and start again" })
     .click();
@@ -99,10 +101,8 @@ test("upload, measure both sides, confirm, and export presentation results", asy
   await mkdir("tmp/pdfs", { recursive: true });
   await download.saveAs("tmp/pdfs/opg-bilateral-report-sample.pdf");
   await page.getByRole("button", { name: "Confirm result" }).first().click();
-  await page
-    .getByRole("button", { name: "Generate observation summary" })
-    .click();
-  await expect(page.getByLabel("Observation summary")).toContainText(
-    "THESIS PRESENTATION OBSERVATION SUMMARY",
+  await page.getByRole("button", { name: "Generate clinical report" }).click();
+  await expect(page.getByLabel("Clinical report")).toContainText(
+    "FINAL CLINICAL REPORT",
   );
 });

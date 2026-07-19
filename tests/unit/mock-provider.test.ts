@@ -16,7 +16,7 @@ describe("MockOPGAnalysisProvider", () => {
     expect(analysisResultSchema.safeParse(result).success).toBe(true);
     expect(result.analysisMode).toBe("research");
     expect(result.requiresSpecialistReview).toBe(true);
-    expect(result.limitations.join(" ")).toContain("four axis points");
+    expect("limitations" in result).toBe(false);
     expect(
       result.findings.every(
         (finding) =>

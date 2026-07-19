@@ -27,6 +27,7 @@ function ascii(value: string): string {
     .replaceAll("—", "-")
     .replaceAll("·", "|")
     .replaceAll("±", "+/-")
+    .replaceAll("\u2212", "-")
     .replaceAll(/[\u0080-\uFFFF]/g, "");
 }
 
@@ -190,7 +191,7 @@ export async function createAnnotatedRadiographPng(
     context.fillStyle = "#b9d8d2";
     context.font = `600 ${Math.max(12, width * 0.012)}px Arial`;
     context.fillText(
-      `Winter: ${angle.classification.replaceAll("_", " ")}`,
+      `Winter's Classification: ${angle.classification.replaceAll("_", " ")}`,
       textX,
       badgeY + badgeHeight * 0.78,
     );
@@ -228,7 +229,7 @@ function drawResultCard(
   page.drawText(`TOOTH ${toothNumber}`, {
     x: x + 14,
     y: y + 59,
-    size: 9,
+    size: 11,
     font: bold,
     color: rgb(0.04, 0.42, 0.37),
   });
@@ -239,8 +240,8 @@ function drawResultCard(
       : "NOT MEASURED",
     {
       x: x + 14,
-      y: y + 37,
-      size: 15,
+      y: y + 36,
+      size: 14,
       font: bold,
       color: rgb(0.07, 0.18, 0.16),
     },
@@ -292,13 +293,13 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     color: rgb(0.72, 0.86, 0.83),
   });
   page.drawText(ascii(`${THESIS_PRESENTER} | ${THESIS_PRESENTER_ROLE}`), {
-    x: 590,
+    x: 560,
     y: PAGE_HEIGHT - 33,
     size: 7.5,
     font: regular,
     color: rgb(0.86, 0.94, 0.92),
   });
-  const metadata = `Study: ${ascii(study.studyReference || "Anonymous")} | Generated: ${new Date().toLocaleString()} | OPG suitability: examiner check required`;
+  const metadata = `Study: ${ascii(study.studyReference || "Anonymous")} | Generated: ${new Date(study.result.generatedAt).toLocaleString()} | OPG suitability: examiner check required`;
   page.drawText(metadata, {
     x: 31,
     y: PAGE_HEIGHT - 88,
@@ -339,8 +340,8 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   );
   drawResultCard(
     page,
-    measuredFinding(study.result.findings, "48"),
-    "48 - PATIENT RIGHT",
+    measuredFinding(study.result.findings, "38"),
+    "38 - LEFT",
     31,
     43,
     376,
@@ -349,8 +350,8 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   );
   drawResultCard(
     page,
-    measuredFinding(study.result.findings, "38"),
-    "38 - PATIENT LEFT",
+    measuredFinding(study.result.findings, "48"),
+    "48 - RIGHT",
     435,
     43,
     376,
@@ -367,7 +368,12 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       color: rgb(0.39, 0.45, 0.44),
     },
   );
-  page.drawText("Page 1 of 2", { x: 758, y: 18, size: 7.5, font: regular });
+  page.drawText("Page 1 of 2", {
+    x: 758,
+    y: 18,
+    size: 7.5,
+    font: regular,
+  });
 
   const detail = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   detail.drawText("MEASUREMENT DETAILS", {
@@ -387,7 +393,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       color: rgb(0.31, 0.4, 0.38),
     },
   );
-  ["48", "38"].forEach((toothNumber, index) => {
+  ["38", "48"].forEach((toothNumber, index) => {
     const finding = measuredFinding(study.result!.findings, toothNumber);
     const angle = finding?.angulation;
     const x = index === 0 ? 31 : 435;
@@ -401,7 +407,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       borderWidth: 1,
     });
     detail.drawText(
-      `TOOTH ${toothNumber} - PATIENT ${toothNumber === "38" ? "LEFT" : "RIGHT"}`,
+      `TOOTH ${toothNumber} - ${toothNumber === "38" ? "LEFT" : "RIGHT"}`,
       {
         x: x + 15,
         y: 483,
@@ -412,10 +418,14 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
     );
     const rows = angle
       ? [
-          ["Winter result", angle.classification.replaceAll("_", " ")],
-          ["Signed Winter angle", `${angle.signedRotationDegrees ?? "-"} deg`],
+          [
+            "Winter's Classification",
+            angle.classification.replaceAll("_", " "),
+          ],
+          ["Acute relative angle", `${angle.relativeAngleDegrees ?? "-"} deg`],
           ["Third-molar axis", `${angle.toothLongAxisDegrees ?? "-"} deg`],
           ["Second-molar axis", `${angle.referenceAxisDegrees ?? "-"} deg`],
+          ["Signed rotation", `${angle.signedRotationDegrees ?? "-"} deg`],
           [
             "Study position category",
             angle.studyEligibleClassification ? "Recorded" : "Incomplete",
@@ -450,7 +460,7 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
   });
   drawWrappedText(
     detail,
-    `Winter classification is calculated from the angle between the examiner-positioned long axes of the mandibular third molar and adjacent second molar. ${WINTER_THRESHOLD_SUMMARY} Pericoronitis must be recorded separately using the defined clinical examination criteria.`,
+    `Winter's Classification is calculated from the angle between the examiner-positioned long axes of the mandibular third molar and adjacent second molar. ${WINTER_THRESHOLD_SUMMARY} Pericoronitis must be recorded separately using the defined clinical examination criteria.`,
     {
       x: 31,
       y: 266,
@@ -461,56 +471,22 @@ export async function createStudyPdf(study: TemporaryStudy): Promise<Blob> {
       color: rgb(0.2, 0.28, 0.27),
     },
   );
-  detail.drawText("PRESENTATION NOTES", {
-    x: 31,
-    y: 195,
-    size: 11,
-    font: bold,
-    color: rgb(0.03, 0.22, 0.2),
-  });
-  drawWrappedText(
-    detail,
-    study.comments.trim() || "No presentation notes entered.",
+  detail.drawText(
+    "For MDS thesis presentation demonstration only - examiner verification required.",
     {
       x: 31,
-      y: 177,
-      width: 780,
-      size: 9,
-      lineHeight: 13,
+      y: 18,
+      size: 7.5,
       font: regular,
-      color: rgb(0.2, 0.28, 0.27),
+      color: rgb(0.39, 0.45, 0.44),
     },
   );
-  detail.drawRectangle({
-    x: 31,
-    y: 49,
-    width: 780,
-    height: 67,
-    color: rgb(1, 0.97, 0.89),
-    borderColor: rgb(0.88, 0.75, 0.44),
-    borderWidth: 1,
+  detail.drawText("Page 2 of 2", {
+    x: 758,
+    y: 18,
+    size: 7.5,
+    font: regular,
   });
-  detail.drawText("IMPORTANT LIMITATION", {
-    x: 45,
-    y: 94,
-    size: 9,
-    font: bold,
-    color: rgb(0.43, 0.3, 0.07),
-  });
-  drawWrappedText(
-    detail,
-    "The axes and classifications require examiner confirmation. This is a thesis-presentation measurement aid; angulation does not diagnose pericoronitis or determine treatment.",
-    {
-      x: 45,
-      y: 78,
-      width: 750,
-      size: 8.5,
-      lineHeight: 12,
-      font: regular,
-      color: rgb(0.43, 0.3, 0.07),
-    },
-  );
-  detail.drawText("Page 2 of 2", { x: 758, y: 18, size: 7.5, font: regular });
 
   const bytes = await pdf.save();
   const buffer = new ArrayBuffer(bytes.byteLength);

@@ -69,7 +69,6 @@ export const analysisResultSchema = z.object({
   status: z.enum(["completed", "unable_to_analyse"]),
   imageQuality: z.enum(["adequate", "limited", "unusable"]),
   findings: z.array(findingSchema),
-  limitations: z.array(z.string().min(1)).min(1),
   generatedAt: z.string().datetime(),
   requiresSpecialistReview: z.literal(true),
 });

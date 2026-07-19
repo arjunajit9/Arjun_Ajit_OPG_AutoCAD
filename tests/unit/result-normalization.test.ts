@@ -11,7 +11,8 @@ describe("stored measurement laterality migration", () => {
       mediaType: "image/png",
       createdAt: "2026-01-01T00:00:00.000Z",
       expiresAt: "2026-01-02T00:00:00.000Z",
-      comments: "",
+      clinicianComments: "",
+      finalClinicalAssessment: "",
       result: {
         schemaVersion: "1.0",
         analysisId: "legacy-study",
@@ -23,12 +24,11 @@ describe("stored measurement laterality migration", () => {
         imageQuality: "limited",
         generatedAt: "2026-01-01T00:00:00.000Z",
         requiresSpecialistReview: true,
-        limitations: ["Legacy record"],
         findings: [
           {
             id: "finding-angulation-38",
             category: "mandibular_third_molar_angulation",
-            title: "Tooth 38 — Winter result: distoangular",
+            title: "Tooth 38 — Winter's Classification: distoangular",
             description: "Legacy measurement",
             toothNumbers: ["38"],
             severity: "not_assessed",

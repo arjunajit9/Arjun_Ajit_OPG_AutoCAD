@@ -144,8 +144,8 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
     const readableSuggestion =
       suggestion === "unable_to_assess" ? "unable to assess" : suggestion;
     await updateFinding(id, {
-      title: `Tooth ${finding.angulation.toothNumber} — Winter result: ${readableSuggestion}`,
-      description: `Winter's classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.signedRotationDegrees}° signed Winter angle). This records the OPG position category for the prospective study; examiner confirmation is required.`,
+      title: `Tooth ${finding.angulation.toothNumber} — Winter's Classification: ${readableSuggestion}`,
+      description: `Winter's Classification from the examiner-placed third-molar and adjacent second-molar long axes is ${readableSuggestion} (${geometry.signedRotationDegrees}° signed Winter angle). This records the OPG position category for the prospective study; examiner confirmation is required.`,
       probability: undefined,
       angulation: {
         ...finding.angulation,
@@ -225,10 +225,14 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
   }
   async function generateReport() {
     if (!study?.result) return;
-    const draft = buildDraftReport(study.result, study.comments);
+    const draft = buildDraftReport(
+      study.result,
+      study.clinicianComments,
+      study.finalClinicalAssessment,
+    );
     await updateStudy(
       { ...study, reportDraft: draft },
-      "Observation summary generated",
+      "Clinical report generated",
     );
     setReportOpen(true);
   }
@@ -498,11 +502,11 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
       <section className="report-section shell">
         <div className="report-controls">
           <div>
-            <div className="eyebrow">Presentation record</div>
-            <h2>Presentation notes and observation summary</h2>
+            <div className="eyebrow">Clinical report</div>
+            <h2>Clinician comments and final clinical assessment</h2>
             <p>
-              Add brief notes for the thesis demonstration and generate an
-              editable observation summary.
+              Add report-ready clinical comments and the final assessment, then
+              generate an editable clinical report.
             </p>
           </div>
           <div className="report-actions">
@@ -528,28 +532,41 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
               {pdfExporting ? "Preparing PDF…" : "Download PDF"}
             </Button>
             <Button onClick={() => void generateReport()}>
-              <FileText size={17} /> Generate observation summary
+              <FileText size={17} /> Generate clinical report
             </Button>
           </div>
         </div>
-        <label className="field-label" htmlFor="comments">
-          Presentation notes
+        <label className="field-label" htmlFor="clinician-comments">
+          Clinician Comments
         </label>
         <textarea
-          id="comments"
+          id="clinician-comments"
           className="comments-input"
-          value={study.comments}
+          value={study.clinicianComments}
           onChange={(event) =>
-            setStudy({ ...study, comments: event.target.value })
+            setStudy({ ...study, clinicianComments: event.target.value })
           }
           onBlur={() => void temporaryStudyStore.put(study)}
-          placeholder="Add presentation notes, measurement comments, or limitations. Do not enter patient identifiers."
+          placeholder="Add clinician comments for the final report. Do not enter patient identifiers."
+        />
+        <label className="field-label" htmlFor="final-clinical-assessment">
+          Final Clinical Assessment
+        </label>
+        <textarea
+          id="final-clinical-assessment"
+          className="comments-input"
+          value={study.finalClinicalAssessment}
+          onChange={(event) =>
+            setStudy({ ...study, finalClinicalAssessment: event.target.value })
+          }
+          onBlur={() => void temporaryStudyStore.put(study)}
+          placeholder="Enter the clinician's final assessment for this OPG measurement report."
         />
         {reportOpen && (
           <div className="report-editor">
             <div className="report-editor-heading">
               <div>
-                <h3>Editable observation summary</h3>
+                <h3>Editable clinical report</h3>
                 <span>Examiner verification required</span>
               </div>
               <div>
@@ -570,7 +587,7 @@ export function AnalysisWorkspace({ analysisId }: { analysisId: string }) {
               </div>
             </div>
             <textarea
-              aria-label="Observation summary"
+              aria-label="Clinical report"
               value={study.reportDraft || ""}
               onChange={(event) =>
                 setStudy({ ...study, reportDraft: event.target.value })
@@ -690,20 +707,20 @@ function AngulationPanel({
   return (
     <details className="measurement-panel" open>
       <summary>
-        {"Winter position and calculation"} <ChevronDown size={15} />
+        {"Winter's Classification and calculation"} <ChevronDown size={15} />
       </summary>
       <div className="angle-result">
         <div>
           <span>
             {isManual
-              ? "Winter's classification — confirm"
+              ? "Winter's Classification — confirm"
               : "Awaiting examiner marking"}
           </span>
           <select
             className="classification-select"
             value={angle.classification}
             disabled={!isManual}
-            aria-label={`Winter classification for tooth ${angle.toothNumber}`}
+            aria-label={`Winter's Classification for tooth ${angle.toothNumber}`}
             onClick={(event) => event.stopPropagation()}
             onChange={(event) =>
               onUpdate({
@@ -763,7 +780,7 @@ function AngulationPanel({
           <dd>
             {isManual && angle.studyEligibleClassification
               ? `Recorded — ${angle.classification.replaceAll("_", " ")}`
-              : "Awaiting a measurable Winter classification"}
+              : "Awaiting a measurable Winter's Classification"}
           </dd>
         </div>
         <div>

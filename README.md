@@ -1,6 +1,6 @@
 # Lakshmi Thesis OPG Tool
 
-A browser-local presentation tool supporting the OPG angulation-measurement component of the prospective MDS thesis, "Assessment of Mandibular Third Molar Position as a Risk Indicator for Pericoronitis." The examiner marks the long axes for FDI teeth 38 and 48 and the tool calculates the Winter position category.
+A browser-local presentation tool supporting the OPG angulation-measurement component of the prospective MDS thesis, "Assessment of Mandibular Third Molar Position as a Risk Indicator for Pericoronitis." The examiner marks the long axes for FDI teeth 38 and 48 and the tool calculates Winter's Classification.
 
 > MDS thesis presentation demonstration only — not for diagnosis or treatment decisions. No position is pre-classified: results are calculated from examiner-positioned geometry. Pericoronitis is assessed separately through the study's clinical protocol.
 

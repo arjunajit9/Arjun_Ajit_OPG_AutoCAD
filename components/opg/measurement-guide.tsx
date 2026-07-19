@@ -300,11 +300,11 @@ const steps = [
   },
   {
     title: "Draw the adjacent second-molar axis",
-    text: "Place point 3 at the adjacent mandibular second-molar root/apical end and point 4 at its crown/occlusal end. Winter's classification compares these two molar long axes.",
+    text: "Place point 3 at the adjacent mandibular second-molar root/apical end and point 4 at its crown/occlusal end. Winter's Classification compares these two molar long axes.",
   },
   {
     title: "Review the on-image angle",
-    text: "Both axes extend to their intersection. The arc remains on the image, while the result badge on the corresponding image side shows the signed Winter angle and classification.",
+    text: "Both axes extend to their intersection. The arc remains on the image, while the result badge on the corresponding image side shows the signed Winter angle and Winter's Classification.",
   },
   {
     title: "Confirm the suggestion",

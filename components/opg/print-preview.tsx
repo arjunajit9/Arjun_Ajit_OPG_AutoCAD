@@ -33,7 +33,7 @@ function examinerStatus(finding: OPGFinding | undefined): string {
   if (!finding) return "Awaiting measurement";
   if (finding.reviewStatus === "accepted") return "Confirmed";
   if (finding.reviewStatus === "rejected") return "Repeat required";
-  if (finding.reviewStatus === "edited") return "Measured — confirm";
+  if (finding.reviewStatus === "edited") return "Measured - confirm";
   return "Awaiting confirmation";
 }
 
@@ -45,10 +45,11 @@ export function StudyPrintPreview({
   onDownload,
 }: StudyPrintPreviewProps) {
   const result = study.result!;
-  const bilateral = ["48", "38"].map((toothNumber) => ({
+  const bilateral = ["38", "48"].map((toothNumber) => ({
     toothNumber,
     finding: measuredFinding(result.findings, toothNumber),
   }));
+
   return (
     <div className="print-preview-backdrop" role="presentation">
       <section
@@ -60,7 +61,7 @@ export function StudyPrintPreview({
         <div className="print-preview-toolbar">
           <div>
             <strong>Print preview</strong>
-            <span>A4 landscape · two-page PDF</span>
+            <span>A4 landscape · two-page thesis results PDF</span>
           </div>
           <div>
             <Button variant="secondary" onClick={() => window.print()}>
@@ -79,6 +80,7 @@ export function StudyPrintPreview({
             </Button>
           </div>
         </div>
+
         <article className="print-preview-sheet">
           <header className="print-report-header">
             <div>
@@ -91,10 +93,11 @@ export function StudyPrintPreview({
             <div className="print-report-meta">
               <strong>{THESIS_PRESENTER}</strong>
               <span>{THESIS_PRESENTER_ROLE}</span>
-              <span>{THESIS_DEPARTMENT}</span>
-              <span>{THESIS_INSTITUTION}</span>
-              <strong>{study.studyReference || "Anonymous study"}</strong>
-              <span>{new Date().toLocaleString()}</span>
+              <strong>Study: {study.studyReference || "Anonymous"}</strong>
+              <span>
+                Generated: {new Date(result.generatedAt).toLocaleString()}
+              </span>
+              <span>OPG suitability: examiner check required</span>
             </div>
           </header>
 
@@ -126,14 +129,12 @@ export function StudyPrintPreview({
               return (
                 <article className="print-result-card" key={toothNumber}>
                   <span>
-                    {toothNumber === "48"
-                      ? "Image left · Patient right"
-                      : "Image right · Patient left"}
+                    Tooth {toothNumber} -{" "}
+                    {toothNumber === "38" ? "Left" : "Right"}
                   </span>
-                  <h2>Tooth {toothNumber}</h2>
                   <strong>
                     {angle
-                      ? `${angle.classification.replaceAll("_", " ")} · ${angle.signedRotationDegrees}°`
+                      ? `${angle.classification.replaceAll("_", " ")} | ${angle.signedRotationDegrees}°`
                       : "Not measured"}
                   </strong>
                   <small>
@@ -147,15 +148,20 @@ export function StudyPrintPreview({
           </section>
 
           <section className="print-detail-section">
-            <h2>Measurement calculations</h2>
+            <h2>Measurement Details</h2>
+            <p className="print-detail-author">
+              {THESIS_PRESENTER} | {THESIS_DEPARTMENT} | {THESIS_INSTITUTION}
+            </p>
             <table>
               <thead>
                 <tr>
                   <th>Tooth</th>
-                  <th>Winter result</th>
-                  <th>Signed Winter angle</th>
+                  <th>Winter&apos;s Classification</th>
+                  <th>Acute relative angle</th>
                   <th>Third-molar axis</th>
                   <th>Second-molar axis</th>
+                  <th>Signed rotation</th>
+                  <th>Study category</th>
                   <th>Examiner status</th>
                 </tr>
               </thead>
@@ -164,13 +170,22 @@ export function StudyPrintPreview({
                   const angle = finding?.angulation;
                   return (
                     <tr key={`detail-${toothNumber}`}>
-                      <th>FDI {toothNumber}</th>
+                      <th>
+                        {toothNumber} -{" "}
+                        {toothNumber === "38" ? "Left" : "Right"}
+                      </th>
                       <td>
                         {angle?.classification.replaceAll("_", " ") || "—"}
                       </td>
-                      <td>{angle?.signedRotationDegrees ?? "—"}°</td>
+                      <td>{angle?.relativeAngleDegrees ?? "—"}°</td>
                       <td>{angle?.toothLongAxisDegrees ?? "—"}°</td>
                       <td>{angle?.referenceAxisDegrees ?? "—"}°</td>
+                      <td>{angle?.signedRotationDegrees ?? "—"}°</td>
+                      <td>
+                        {angle?.studyEligibleClassification
+                          ? "Recorded"
+                          : "Incomplete"}
+                      </td>
                       <td>{examinerStatus(finding)}</td>
                     </tr>
                   );
@@ -179,25 +194,22 @@ export function StudyPrintPreview({
             </table>
           </section>
 
-          <section className="print-method-section">
+          <section className="print-method-section print-method-single">
             <div>
               <h2>Method</h2>
               <p>
-                Winter classification is calculated from the examiner-positioned
-                long axes of the mandibular third molar and adjacent second
-                molar. {WINTER_THRESHOLD_SUMMARY}
+                Winter&apos;s Classification is calculated from the angle
+                between the examiner-positioned long axes of the mandibular
+                third molar and adjacent second molar.{" "}
+                {WINTER_THRESHOLD_SUMMARY} Pericoronitis must be recorded
+                separately using the defined clinical examination criteria.
               </p>
-            </div>
-            <div>
-              <h2>Presentation notes</h2>
-              <p>{study.comments.trim() || "No presentation notes entered."}</p>
             </div>
           </section>
 
           <footer className="print-report-footer">
-            <strong>For MDS thesis presentation demonstration only.</strong>{" "}
-            Examiner verification is required. Angulation does not diagnose
-            pericoronitis; the clinical outcome must be recorded separately.
+            For MDS thesis presentation demonstration only - examiner
+            verification required.
           </footer>
         </article>
       </section>

@@ -85,7 +85,8 @@ export function UploadWorkflow() {
         studyReference: reference.trim() || undefined,
         createdAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + hours * 3_600_000).toISOString(),
-        comments: "",
+        clinicianComments: "",
+        finalClinicalAssessment: "",
       };
       await temporaryStudyStore.put(study);
       const result = await new MockOPGAnalysisProvider().analyse({

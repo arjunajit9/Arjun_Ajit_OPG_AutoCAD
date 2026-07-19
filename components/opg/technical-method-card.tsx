@@ -14,7 +14,7 @@ export function TechnicalMethodCard() {
         <h2 id="technical-method-title">Technical Method</h2>
         <p>
           This tool uses examiner-guided deterministic 2D analytical geometry.
-          The Winter angle is calculated from examiner-marked landmark
+          Winter&apos;s angle is calculated from examiner-marked landmark
           coordinates with image aspect-ratio correction, using the same general
           mathematical principles as angle-measurement tools in{" "}
           <strong>AutoCAD</strong> and <strong>ImageJ</strong>.

@@ -19,12 +19,6 @@ export class MockOPGAnalysisProvider implements OPGAnalysisProvider {
       imageQuality: "limited",
       generatedAt: new Date().toISOString(),
       requiresSpecialistReview: true,
-      limitations: [
-        "No angulation result is produced until the examiner places all four axis points.",
-        "The presentation tool is scoped to FDI teeth 38 and 48 and cannot establish pericoronitis.",
-        "Pericoronitis is a clinical outcome and is not determined from an OPG alone.",
-        "The examiner must verify landmark placement and the resulting Winter classification.",
-      ],
       findings: [
         {
           id: "finding-angulation-48",
