@@ -718,7 +718,7 @@ h3 {
   align-items: center;
 }
 .viewer-toolbar span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .tool-buttons {
@@ -783,17 +783,24 @@ h3 {
 .viewer-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
-  padding: 10px 14px;
+  gap: 12px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--line);
   background: #f7faf9;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 .viewer-legend span {
   display: flex;
   align-items: center;
   gap: 5px;
+  font-weight: 650;
+}
+.viewer-legend span:last-child {
+  margin-left: auto;
+  color: #36534d;
+  font-weight: 750;
 }
 .viewer-legend i {
   width: 10px;
@@ -815,14 +822,15 @@ h3 {
   display: block;
 }
 .model-strip span {
-  font-size: 9px;
+  font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
   margin-bottom: 5px;
 }
 .model-strip strong {
-  font-size: 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
 }
 .status-dot {
   display: inline-block;
@@ -849,12 +857,13 @@ h3 {
   border-bottom: 1px solid var(--line);
 }
 .findings-header h2 {
-  font-size: 19px;
+  font-size: 21px;
   margin: 0 0 3px;
 }
 .findings-header p {
   margin: 0;
-  font-size: 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
   color: var(--muted);
 }
 .progress-ring {
@@ -899,7 +908,7 @@ h3 {
 .finding-card {
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 14px;
+  padding: 16px;
   margin-bottom: 10px;
   cursor: pointer;
   transition: 0.15s;
@@ -925,27 +934,28 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--teal);
-  font-size: 8px;
+  font-size: 9.5px;
   font-weight: 800;
 }
 .review-label {
-  font-size: 9px;
+  font-size: 10.5px;
   color: var(--muted);
   display: flex;
   align-items: center;
 }
 .finding-card h3 {
-  font-size: 15px;
+  font-size: 16.5px;
   margin: 8px 0 3px;
 }
 .finding-card p {
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--muted);
   margin: 7px 0;
 }
 .finding-card .region {
-  font-size: 9px;
+  font-size: 10.5px;
+  line-height: 1.45;
   color: #55716b;
   margin: 0;
 }
@@ -984,7 +994,7 @@ h3 {
   padding-top: 8px;
 }
 .finding-actions .button {
-  font-size: 10px;
+  font-size: 11px;
 }
 .active-accept {
   color: #08784f;
@@ -1008,7 +1018,8 @@ h3 {
   list-style: none;
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 11.5px;
+  line-height: 1.4;
   font-weight: 800;
   color: var(--teal);
 }
@@ -1020,7 +1031,7 @@ h3 {
   margin-top: 9px;
 }
 .angle-result div {
-  padding: 9px;
+  padding: 11px;
 }
 .angle-result div + div {
   border-left: 1px solid #dbe8e4;
@@ -1030,43 +1041,45 @@ h3 {
   display: block;
 }
 .angle-result span {
-  font-size: 8px;
+  font-size: 9.5px;
+  line-height: 1.35;
   text-transform: uppercase;
   color: var(--muted);
 }
 .angle-result strong {
   text-transform: capitalize;
-  font-size: 14px;
+  font-size: 17px;
   margin-top: 3px;
 }
 .angle-result strong small {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 .measurement-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 7px;
+  gap: 8px;
   margin: 10px 0;
 }
 .measurement-grid div {
   background: #fafcfb;
-  padding: 7px;
+  padding: 9px;
   border-radius: 6px;
 }
 .measurement-grid .full {
   grid-column: 1/3;
 }
 .measurement-grid dt {
-  font-size: 7px;
+  font-size: 8.5px;
+  line-height: 1.35;
   text-transform: uppercase;
   color: var(--muted);
   letter-spacing: 0.05em;
 }
 .measurement-grid dd {
   margin: 3px 0 0;
-  font-size: 9px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.45;
 }
 .measurement-caution {
   display: flex;
@@ -1845,7 +1858,7 @@ h3 {
   padding: 5px 7px;
   background: #fff;
   color: var(--ink);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
   text-transform: capitalize;
 }
@@ -2106,11 +2119,11 @@ h3 {
   margin-bottom: 14px;
 }
 .analysis-grid.bilateral-grid {
-  width: min(100% - 40px, 1500px);
+  width: min(100% - 32px, 1580px);
   margin-inline: auto;
-  grid-template-columns: minmax(250px, 0.65fr) minmax(520px, 1.7fr) minmax(
-      250px,
-      0.65fr
+  grid-template-columns: minmax(280px, 0.72fr) minmax(500px, 1.55fr) minmax(
+      280px,
+      0.72fr
     );
   gap: 16px;
 }
@@ -2156,7 +2169,7 @@ h3 {
   border-radius: 999px;
   background: #08796b;
   color: white;
-  font-size: 8px;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -2164,12 +2177,12 @@ h3 {
 }
 .panel-selection-strip {
   margin: 0 12px;
-  padding: 8px 10px;
+  padding: 9px 11px;
   border-top: 1px solid rgba(216, 146, 34, 0.35);
   border-bottom: 1px solid rgba(216, 146, 34, 0.35);
   background: rgba(255, 244, 218, 0.72);
   color: #754a08;
-  font-size: 9px;
+  font-size: 10.5px;
   font-weight: 750;
   letter-spacing: 0.04em;
   line-height: 1.35;
@@ -2182,7 +2195,7 @@ h3 {
   color: #075e53;
 }
 .side-findings .findings-header {
-  min-height: 88px;
+  min-height: 96px;
 }
 .side-findings .findings-list {
   padding: 12px;
@@ -2191,7 +2204,7 @@ h3 {
   margin-bottom: 0;
 }
 .side-findings .finding-card h3 {
-  font-size: 14px;
+  font-size: 16.5px;
 }
 .side-findings .finding-actions {
   flex-wrap: wrap;
@@ -2209,6 +2222,14 @@ h3 {
   }
 }
 @media (max-width: 700px) {
+  .viewer-legend {
+    gap: 10px 14px;
+    font-size: 11px;
+  }
+  .viewer-legend span:last-child {
+    width: 100%;
+    margin-left: 0;
+  }
   .technical-method-card {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;

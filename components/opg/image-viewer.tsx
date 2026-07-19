@@ -139,7 +139,7 @@ export function ImageViewer({
     <div className="viewer-card">
       <div className="viewer-toolbar">
         <div>
-          <strong>Geometry viewer</strong>
+          <strong>OPG Measurement Viewer</strong>
           <span>{Math.round(scale * 100)}%</span>
         </div>
         <div className="tool-buttons">
